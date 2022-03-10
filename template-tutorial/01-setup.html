@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Setup :: Template Tutorial</title>
-    <link rel="canonical" href="https://redhat-scholars.github.io/course-template/template-tutorial/01-setup.html">
+    <title>Setup :: Kube-Native Java Apps</title>
+    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/template-tutorial/01-setup.html">
     <link rel="prev" href="index.html">
-    <link rel="next" href="02-deploy.html">
+    <link rel="next" href="02-bootstrap.html">
     <meta name="generator" content="Antora 3.0.0">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -15,7 +15,7 @@
   <nav class="navbar">
     <div class="navbar-brand">
       <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
-      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/course-template">Template Tutorial</a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://github.com/redhat-scholars/kube-native-java-apps">Kube-Native Java Apps</a>
       <button class="navbar-burger" data-target="topbar-nav">
         <span></span>
         <span></span>
@@ -49,31 +49,168 @@
   <nav class="nav-menu">
     <h3 class="title"><a href="index.html"></a></h3>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="0">
-<ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="0">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="01-setup.html">1. Setup</a>
+    <a class="nav-link" href="01-setup.html">Get Started</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#prerequisite">Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#minikube">Setup Minikube</a>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#minikube">Minikube</a>
   </li>
 </ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-bootstrap.html">Bootstrap Quarkus App</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#devmode">Quarkus dev mode</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="02-deploy.html">2. Deploy Service</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="02-deploy.html#package">Build Service</a>
+    <a class="nav-link" href="02-bootstrap.html#continuous-testing">Quarkus Continuous Testing</a>
   </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="02-deploy.html#deploy">Deploy Dervice</a>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#configuration">Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#resteasy-openapi">RestEasy Jackson/OpenAPI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#springboot-compat">Spring Boot migration</a>
   </li>
 </ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-kube-intro.html">Introduction to Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#sandbox">Getting your OpenShift Sandbox account</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#quay">Getting your Quay account</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-containers.html">Creating containers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#dockerfile">Using Dockerfile</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#jib">Using Jib</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#buildpacks">Using Buildpacks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="05-kube-deployment.html">Kubernetes Deployment</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#kube-extension">Kubernetes extension</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#customize-resources">Customize created resources</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#deploy-remote-service">Deploy What’s Time service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with What’s Time service</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Add Resource Limits</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="09-panache.html">Hibernate Panache</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#panache-apps">Create Panache Applications</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#dev-services">Dev services</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#deploy-db">Deploy Database in the sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#show-healths">Show Health Checks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#show-db-down">Scale Down DB</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="10-metrics.html">Tracing/Logging/Monitoring</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#logger">Logger</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#jaeger">Jaeger</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="11-serverless.html">Going Serverless</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#knative-intro">Intro to Knative</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#servelessing-service">Serverlessing a service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#native-compile">Compile to native</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#deploy-native">Deploy</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="12-bonus-track.html">BONUS - Kafka</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#managed-kafka">Create a Managed Kafka instance</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#deploy-quarkus-sb">Deploy app in Quarkus using Kafka and Service Binding</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#knative-eventing">Knative Eventing</a>
   </li>
 </ul>
   </li>
@@ -90,7 +227,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Template Tutorial</a></li>
-    <li><a href="01-setup.html">1. Setup</a></li>
+    <li><a href="01-setup.html">Get Started</a></li>
   </ul>
 </nav>
   <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/01-setup.adoc">Edit this Page</a></div>
@@ -367,7 +504,7 @@ Kubernetes Version: v1.18.6</code></pre>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="index.html">Template Tutorial</a></span>
-  <span class="next"><a href="02-deploy.html">2. Deploy Service</a></span>
+  <span class="next"><a href="02-bootstrap.html">Bootstrap Quarkus App</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">

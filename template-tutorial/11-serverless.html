@@ -3,9 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Best Practices for Kube-Native Java Apps Workshop :: Kube-Native Java Apps</title>
-    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/template-tutorial/index.html">
-    <link rel="next" href="01-setup.html">
+    <title>Quarkus Serverless with Knative :: Kube-Native Java Apps</title>
+    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/template-tutorial/11-serverless.html">
+    <link rel="prev" href="10-metrics.html">
+    <link rel="next" href="12-bonus-track.html">
     <meta name="generator" content="Antora 3.0.0">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -180,21 +181,21 @@
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="0">
+  <li class="nav-item is-current-page" data-depth="0">
     <button class="nav-item-toggle"></button>
     <a class="nav-link" href="11-serverless.html">Going Serverless</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="11-serverless.html#knative-intro">Intro to Knative</a>
+    <a class="nav-link" href="#knative-intro">Intro to Knative</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="11-serverless.html#servelessing-service">Serverlessing a service</a>
+    <a class="nav-link" href="#servelessing-service">Serverlessing a service</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="11-serverless.html#native-compile">Compile to native</a>
+    <a class="nav-link" href="#native-compile">Compile to native</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="11-serverless.html#deploy-native">Deploy</a>
+    <a class="nav-link" href="#deploy-native">Deploy</a>
   </li>
 </ul>
   </li>
@@ -222,188 +223,45 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="index.html" class="home-link is-current"></a>
+  <a href="index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Template Tutorial</a></li>
-    <li><a href="index.html">Best Practices for Kube-Native Java Apps Workshop</a></li>
+    <li><a href="11-serverless.html">Going Serverless</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/11-serverless.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
-<h1 class="page">Best Practices for Kube-Native Java Apps Workshop</h1>
-<div class="sect1 text-center strong">
-<h2>Best Practices for Kube-Native Java Apps Workshop</h2>
+<h1 class="page">Quarkus Serverless with Knative</h1>
+<div class="sect1">
+<h2 id="knative-intro"><a class="anchor" href="#knative-intro"></a>Intro to Knative</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Developers can deploy almost any Java application to Kubernetes. But how easy is it to build a container image? What about creating YAML files? What about putting it into production? And how efficient is it going to be?
-Join us on this full-day workshop to learn the best way to manage Java application resources on Kubernetes efficiently</p>
+
 </div>
 </div>
-</div>
-<div class="sect1 tiles browse">
-<h2>Browse modules</h2>
+<div class="sect1">
+<h2 id="servelessing-service"><a class="anchor" href="#servelessing-service"></a>Serverlessing What’s Time service</h2>
 <div class="sectionbody">
-<div class="ulist tile">
-<div class="title"><a href="01-setup.html" class="xref page">Get Started</a></div>
-<ul>
-<li>
-<p><a href="01-setup.html#minikube" class="xref page">Minikube</a></p>
-</li>
-</ul>
+
 </div>
-<div class="ulist tile">
-<div class="title"><a href="02-bootstrap.html" class="xref page">Bootstrap Quarkus App</a></div>
-<ul>
-<li>
-<p><a href="02-bootstrap.html#devmode" class="xref page">Quarkus dev mode</a></p>
-</li>
-<li>
-<p><a href="02-bootstrap.html#continuous-testing" class="xref page">Quarkus Continuous Testing</a></p>
-</li>
-<li>
-<p><a href="02-bootstrap.html#configuration" class="xref page">Configuration</a></p>
-</li>
-<li>
-<p><a href="02-bootstrap.html#resteasy-openapi" class="xref page">RestEasy Jackson/OpenAPI</a></p>
-</li>
-<li>
-<p><a href="02-bootstrap.html#springboot-compat" class="xref page">Spring Boot migration</a></p>
-</li>
-</ul>
 </div>
-<div class="ulist tile">
-<div class="title"><a href="03-kube-intro.html" class="xref page">Introduction to Kubernetes</a></div>
-<ul>
-<li>
-<p><a href="03-kube-intro.html#sandbox" class="xref page">Getting your OpenShift Sandbox account</a></p>
-</li>
-<li>
-<p><a href="03-kube-intro.html#quay" class="xref page">Getting your Quay account</a></p>
-</li>
-</ul>
+<div class="sect1">
+<h2 id="native-compile"><a class="anchor" href="#native-compile"></a>Compile to native</h2>
+<div class="sectionbody">
+
 </div>
-<div class="ulist tile">
-<div class="title"><a href="04-containers.html" class="xref page">Creating containers</a></div>
-<ul>
-<li>
-<p><a href="04-containers.html#dockerfile" class="xref page">Using Dockerfile</a></p>
-</li>
-<li>
-<p><a href="04-containers.html#jib" class="xref page">Using Jib</a></p>
-</li>
-<li>
-<p><a href="04-containers.html#buildpacks" class="xref page">Using Buildpacks</a></p>
-</li>
-</ul>
 </div>
-<div class="ulist tile">
-<div class="title"><a href="05-kube-deployment.html" class="xref page">Kubernetes Deployment</a></div>
-<ul>
-<li>
-<p><a href="05-kube-deployment.html#kube-extension" class="xref page">Kubernetes extension</a></p>
-</li>
-<li>
-<p><a href="05-kube-deployment.html#customize-resources" class="xref page">Customize created resources</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile">
-<div class="title"><a href="06-rest-client-fault.html" class="xref page">Rest Client &amp; Fault Tolerance</a></div>
-<ul>
-<li>
-<p><a href="06-rest-client-fault.html#deploy-remote-service" class="xref page">Deploy What’s Time service</a></p>
-</li>
-<li>
-<p><a href="06-rest-client-fault.html#rest-client" class="xref page">Create Rest Client</a></p>
-</li>
-<li>
-<p><a href="06-rest-client-fault.html#fault-tolerance" class="xref page">Fault tolerance on communication with What’s Time service</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile tile">
-<div class="title"><a href="08-quarkus-cloud-native.html" class="xref page">Quarkus Cloud Native</a></div>
-<ul>
-<li>
-<p><a href="08-quarkus-cloud-native.html#limits" class="xref page">Add Resource Limits</a></p>
-</li>
-<li>
-<p><a href="08-quarkus-cloud-native.html#health" class="xref page">Health check extension</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile">
-<div class="title"><a href="09-panache.html" class="xref page">Hibernate Panache</a></div>
-<ul>
-<li>
-<p><a href="09-panache.html#panache-apps" class="xref page">Create Panache Applications</a></p>
-</li>
-<li>
-<p><a href="09-panache.html#dev-services" class="xref page">Dev services</a></p>
-</li>
-<li>
-<p><a href="09-panache.html#deploy-db" class="xref page">Deploy Database in the sandbox</a></p>
-</li>
-<li>
-<p><a href="09-panache.html#show-healths" class="xref page">Show Health Checks</a></p>
-</li>
-<li>
-<p><a href="09-panache.html#show-db-down" class="xref page">Scale Down DB</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile">
-<div class="title"><a href="10-metrics.html" class="xref page">Tracing/Logging/Monitoring</a></div>
-<ul>
-<li>
-<p><a href="10-metrics.html#micrometer" class="xref page">Micrometer</a></p>
-</li>
-<li>
-<p><a href="10-metrics.html#logger" class="xref page">Logger</a></p>
-</li>
-<li>
-<p><a href="10-metrics.html#jaeger" class="xref page">Jaeger</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile">
-<div class="title"><a href="11-serverless.html" class="xref page">Going Serverless</a></div>
-<ul>
-<li>
-<p><a href="11-serverless.html#knative-intro" class="xref page">Intro to Knative</a></p>
-</li>
-<li>
-<p><a href="11-serverless.html#servelessing-service" class="xref page">Serverlessing a service</a></p>
-</li>
-<li>
-<p><a href="11-serverless.html#native-compile" class="xref page">Compile to native</a></p>
-</li>
-<li>
-<p><a href="11-serverless.html#deploy-native" class="xref page">Deploy</a></p>
-</li>
-</ul>
-</div>
-<div class="ulist tile">
-<div class="title"><a href="12-bonus-track.html" class="xref page">BONUS - Kafka</a></div>
-<ul>
-<li>
-<p><a href="12-bonus-track.html#managed-kafka" class="xref page">Create a Managed Kafka instance</a></p>
-</li>
-<li>
-<p><a href="12-bonus-track.html#deploy-quarkus-sb" class="xref page">Deploy app in Quarkus using Kafka and Service Binding</a></p>
-</li>
-<li>
-<p><a href="12-bonus-track.html#knative-eventing" class="xref page">Knative Eventing</a></p>
-</li>
-</ul>
-</div>
+<div class="sect1">
+<h2 id="deploy-native"><a class="anchor" href="#deploy-native"></a>Deploy</h2>
+<div class="sectionbody">
+
 </div>
 </div>
 <nav class="pagination">
-  <span class="next"><a href="01-setup.html">Get Started</a></span>
+  <span class="prev"><a href="10-metrics.html">Tracing/Logging/Monitoring</a></span>
+  <span class="next"><a href="12-bonus-track.html">BONUS - Kafka</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
