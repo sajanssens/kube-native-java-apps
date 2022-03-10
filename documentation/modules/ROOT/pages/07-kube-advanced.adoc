@@ -1,0 +1,3 @@
+= Kubernetes Advanced - Resource Limits & Health Checks
+include::_attributes.adoc[]
+

@@ -1,0 +1,18 @@
+= Bootstrap a Quarkus project with REST API
+include::_attributes.adoc[]
+
+[#devmode]
+== Quarkus dev mode
+
+[#continuous-testing]
+== Quarkus Continuous Testing
+
+[#configuration]
+== Configuration
+
+[#resteasy-openapi]
+== RestEasy Jackson/OpenAPI
+
+[#springboot-compat]
+== Oh you are coming from Spring Boot, no worries
+

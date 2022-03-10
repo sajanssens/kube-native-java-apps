@@ -1,0 +1,12 @@
+= Quarkus Cloud Native
+include::_attributes.adoc[]
+
+[#limits]
+== Customize Kubernetes.yaml with new limits
+
+https://github.com/redhat-scholars/openshift-apps-resource-management/blob/master/apps/mem-consumer/src/main/java/org/acme/GreetingResource.java
+
+
+[#health]
+== Health check extension
+

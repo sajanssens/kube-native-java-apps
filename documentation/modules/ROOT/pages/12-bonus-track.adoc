@@ -1,0 +1,11 @@
+= Kafka
+include::_attributes.adoc[]
+
+[#managed-kafka]
+== Create a Managed Kafka instance
+
+[#deploy-quarkus-sb]
+== Deploy app in Quarkus using Kafka and Service Binding
+
+[#knative-eventing]
+== Knative Eventing 

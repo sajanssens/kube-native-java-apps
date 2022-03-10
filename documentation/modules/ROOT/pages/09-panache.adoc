@@ -1,0 +1,18 @@
+= Hibernate Panache
+include::_attributes.adoc[]
+
+[#panache-apps]
+== Create Panache Applications
+
+[#dev-services]
+== Dev services
+
+[#deploy-db]
+== Deploy Database in the sandbox
+
+[#show-healths]
+== Show Health Checks
+
+[#show-db-down]
+== Show that if DB is down Pod is not ready anymore
+

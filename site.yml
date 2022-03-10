@@ -2,8 +2,8 @@ runtime:
   cache_dir: ./.cache/antora
 
 site:
-  title: Template Tutorial
-  url: https://redhat-scholars.github.io/course-template
+  title: Kube-Native Java Apps
+  url: https://github.com/redhat-scholars/kube-native-java-apps
   start_page: template-tutorial::index.adoc
 
 content:

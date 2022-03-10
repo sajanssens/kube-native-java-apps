@@ -1,0 +1,9 @@
+= Kubernetes Deployment
+include::_attributes.adoc[]
+
+[#kube-extension]
+== Kubernetes extension
+
+[#customize-resources]
+== Customize created resources
+

@@ -1,0 +1,15 @@
+= Rest Client & Fault Tolerance
+include::_attributes.adoc[]
+
+
+[#deploy-remote-service]
+== Deploy What’s Time service
+
+using Sandbox +Add button (Kube YAML, Dockerfile, Container Image)
+
+[#rest-client]
+== Create Rest Client
+
+[#fault-tolerance]
+== Fault tolerance on communication with What’s Time service
+
