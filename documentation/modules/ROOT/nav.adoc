@@ -1,6 +1,6 @@
 [.tile]
 .xref:01-setup.adoc[Get Started]
-* xref:01-setup.adoc#minikube[Minikube]
+* xref:01-setup.adoc#prerequisite[Prerequisites]
 
 [.tile]
 .xref:02-bootstrap.adoc[Bootstrap Quarkus App]
