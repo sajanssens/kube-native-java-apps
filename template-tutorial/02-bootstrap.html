@@ -236,33 +236,746 @@
 <article class="doc">
 <h1 class="page">Bootstrap a Quarkus project with REST API</h1>
 <div class="sect1">
+<h2 id="_creating_a_quarkus_application"><a class="anchor" href="#_creating_a_quarkus_application"></a>Creating a Quarkus Application</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are several ways to create a Quarkus project and all of them are valid:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://quarkus.io/guides/cli-tooling">Quarkus CLI too</a></p>
+</li>
+<li>
+<p>Maven</p>
+</li>
+<li>
+<p><a href="https://code.quarkus.io/">Code Quarkus website</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For the sake of simplicity, we are going to use the later one.
+Open a browser and navigate to <a href="https://code.quarkus.io/" class="bare">https://code.quarkus.io/</a>.</p>
+</div>
+<div class="paragraph">
+<p>There you can set the name of the artifact (<code>todo-app</code>) and select the RESTEasy JAX-RS endpoint to create a REST API service.
+In the following capture, you see page with all the modifications described above:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/todo-app-gen.png" alt="todo app gen">
+</div>
+</div>
+<div class="paragraph">
+<p>The push <strong>Generate your application</strong> button, download the zip file into a folder, and unzip it.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">unzip todo-app.zip
+cd todo-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open the project in your favourite IDE, and open the file <code>src/main/java/org/acme/GreetingResource.java</code> to see how to define a REST endpoint in Quarkus:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import javax.ws.rs.GET; <i class="conum" data-value="1"></i><b>(1)</b>
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/hello") <i class="conum" data-value="2"></i><b>(2)</b>
+public class GreetingResource {
+
+    @GET <i class="conum" data-value="3"></i><b>(3)</b>
+    @Produces(MediaType.TEXT_PLAIN) <i class="conum" data-value="4"></i><b>(4)</b>
+    public String hello() {
+        return "Hello RESTEasy"; <i class="conum" data-value="5"></i><b>(5)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Imports from JAX-RS spec</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>@Path</code> to set the endpoint for this resource</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>HTTP method to use.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Mime-Type of produced message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>A simple text message</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s query this REST API endpoint.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="devmode"><a class="anchor" href="#devmode"></a>Quarkus dev mode</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p><em>Live Coding</em> or <em>Development mode</em> enables hot deployment with background compilation, which means that when you modify your Java files and/or your resource files and refresh your browser, these changes will automatically take effect.</p>
+</div>
+<div class="paragraph">
+<p>This is probably one of the best features of Quarkus: enabling a very fast and productive iterative feedback loop.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s start the <em>Live Coding</em> mode by invoking <code>mvnw</code> from the project directory.</p>
+</div>
+<div class="paragraph">
+<p>Open a terminal window and run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw compile quarkus:dev</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After a second or so, you&#8217;ll have the application started in dev mode.</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[INFO] Scanning for projects...
+....
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2022-03-22 10:46:44,424 INFO  [io.quarkus] (Quarkus Main Thread) todo-app 1.0.0-SNAPSHOT on JVM (powered by Quarkus 2.7.5.Final) started in 1.743s. Listening on: http://localhost:8080
 
+2022-03-22 10:46:44,440 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
+2022-03-22 10:46:44,441 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, resteasy, smallrye-context-propagation, vertx]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In a new terminal window send a request to <code><a href="http://localhost:8080/hello" class="bare">http://localhost:8080/hello</a></code> and you&#8217;ll get the result:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">http localhost:8080/hello</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">HTTP/1.1 200 OK
+Content-Type: text/plain;charset=UTF-8
+content-length: 14
+
+Hello RESTEasy</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Get back to your IDE without stopping the service and change the return message from <code>Hello RESTEasy</code> to <code>Hello World</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@GET
+@Produces(MediaType.TEXT_PLAIN)
+public String hello() {
+    return "Hello World";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And in the terminal window send again a request to <code><a href="http://localhost:8080/hello" class="bare">http://localhost:8080/hello</a></code></p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">http localhost:8080/hello</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">HTTP/1.1 200 OK
+Content-Type: text/plain;charset=UTF-8
+content-length: 11
+
+Hello World</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that without having to stop the service, nor recompiling, the service is updated and the requests returns the modification we&#8217;ve done in the code.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="continuous-testing"><a class="anchor" href="#continuous-testing"></a>Quarkus Continuous Testing</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>So far, we&#8217;ve developed a simple REST endpoint, but how about testing it?
+Open the following file <code>src/test/java/org/acme/GreetingResourceTest.java</code> to see an example of a Quarkus test:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.Test;
+
+import static io.restassured.RestAssured.given; <i class="conum" data-value="1"></i><b>(1)</b>
+import static org.hamcrest.CoreMatchers.is;
+
+@QuarkusTest <i class="conum" data-value="2"></i><b>(2)</b>
+public class GreetingResourceTest {
+
+    @Test
+    public void testHelloEndpoint() {
+        given() <i class="conum" data-value="3"></i><b>(3)</b>
+          .when().get("/hello") <i class="conum" data-value="4"></i><b>(4)</b>
+          .then()
+             .statusCode(200)
+             .body(is("Hello RESTEasy")); <i class="conum" data-value="5"></i><b>(5)</b>
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Although not mandatory, Quarkus uses <a href="https://rest-assured.io/">RestAssured</a> to test Rest APIs</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This annotations boots up the application before executing the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The location of the service (<code>host:port</code>) is automatically configured</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Creates a <code>GET</code> HTTP request to <code>/hello</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Asserts that the message is <code>Hello RESTEasy</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Go back to terminal window (navigate to <code>todo-app</code> directory if not already there) and run the test executing the <code>test</code> command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the output is similar to:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[INFO] Running org.acme.GreetingResourceTest
+2022-03-22 11:53:25,466 INFO  [org.jbo.threads] (main) JBoss Threads version 3.4.2.Final
+2022-03-22 11:53:26,420 INFO  [io.quarkus] (main) Quarkus 2.7.5.Final on JVM started in 1.363s. Listening on: http://localhost:8081 <i class="conum" data-value="1"></i><b>(1)</b>
+2022-03-22 11:53:26,420 INFO  [io.quarkus] (main) Profile test activated.
+2022-03-22 11:53:26,421 INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, smallrye-context-propagation, vertx]
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 4.219 s &lt;&lt;&lt; FAILURE! - in org.acme.GreetingResourceTest
+[ERROR] org.acme.GreetingResourceTest.testHelloEndpoint  Time elapsed: 1.118 s  &lt;&lt;&lt; FAILURE! <i class="conum" data-value="2"></i><b>(2)</b>
+java.lang.AssertionError:
+1 expectation failed.
+Response body doesn t match expectation.
+Expected: is "Hello RESTEasy"
+  Actual: Hello World
+	at org.acme.GreetingResourceTest.testHelloEndpoint(GreetingResourceTest.java:18)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Tests are started to port 8081 by default, so no worries on the previous running instance in dev mode</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Obviously test is failing as the we changed the message</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s fix the test by changing the expected message to <code>Hello World</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Test
+public void testHelloEndpoint() {
+    given()
+    .when().get("/hello")
+    .then()
+    .statusCode(200)
+    .body(is("Hello World"));
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run again the test goal to validate that we&#8217;ve fixed the test.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the output is similar to:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.231 s - in org.acme.GreetingResourceTest
+2022-03-22 11:59:37,279 INFO  [io.quarkus] (main) Quarkus stopped in 0.041s
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the normal way we&#8217;ve used for years in Java for executing tests, but Quarkus comes with one thing called Continuous Testing, meaning that your tests will run immediately after code changes were saved.</p>
+</div>
+<div class="paragraph">
+<p>Go back to the terminal window where you started the application in dev mode at the beginning of this section, and down the bottom of the screen you should see the following:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Tests paused
+Press [r] to resume testing, [o] Toggle test output, [:] for the terminal, [h] for more options&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Press <code>r</code> and the tests will start running.
+You should see the status change down the bottom of the screen as they are running, and it should finish similar to this:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">All 1 test is passing (0 skipped), 1 test was run in 239ms. Tests completed at 12:03:37 due to changes to GreetingResource.class.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So all tests have run and they are passing.
+But now, we&#8217;re in continuous testing mode which means that any change we do in the code, Quarkus will detect tests affected by the change, and re-run them automatically.</p>
+</div>
+<div class="paragraph">
+<p>Go to your IDE without stopping the service, open <code>GreetingResource.java</code>, and change the return message from <code>Hello World</code> to <code>Hi World</code>.</p>
+</div>
+<div class="paragraph">
+<p>Then save the file and go back to the terminal window where the application wa started in dev mode.
+Automatically, you&#8217;ll see the following message in the console indicating that there is one test failure:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">2022-03-22 11:24:47,216 INFO  [io.qua.dep.dev.RuntimeUpdatesProcessor] (vert.x-worker-thread-0) Live reload total time: 0.742s
+2022-03-22 12:14:06,118 ERROR [io.qua.test] (Test runner thread) ==================== TEST REPORT #3 ====================
+2022-03-22 12:14:06,118 ERROR [io.qua.test] (Test runner thread) Test GreetingResourceTest#testHelloEndpoint() failed
+: java.lang.AssertionError: 1 expectation failed.
+Response body doesnt match expectation.
+Expected: is "Hello World"
+  Actual: Hi World</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now open <code>GreetingResourceTest</code> and update the expecting message to be <code>Hi World</code>, and inspect again the console</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">2022-03-22 12:16:50,783 INFO  [io.qua.test] (Test runner thread) All tests are now passing
+--
+All 1 test is passing (0 skipped), 1 test was run in 316ms. Tests completed at 12:16:50 due to changes to GreetingResourceTest.class.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tests are back to normal.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="configuration"><a class="anchor" href="#configuration"></a>Configuration</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>In Quarkus, there is a central place where you can configure the application.
+Let&#8217;s make the greeting message configurable.
+Open the <code>src/main/resources/application.properties</code> file and add the following property:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">greeting.message=Hi World</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then modify <code>GreetingResource.java</code> class to inject this property value:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@ConfigProperty(name = "greeting.message") <i class="conum" data-value="1"></i><b>(1)</b> <i class="conum" data-value="2"></i><b>(2)</b>
+String msg;
 
+@GET
+@Produces(MediaType.TEXT_PLAIN)
+public String hello() {
+    return msg; <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import <code>org.eclipse.microprofile.config.inject.ConfigProperty</code> class</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Injects the value set in the <code>greeting.message</code> property</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Returns the message value</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Before jumping to the following section, stop the application running instance by pressing <code>q</code> char.</p>
+</div>
+<div class="paragraph">
+<p>This is a really simple example, let&#8217;s move things forward and create a TODO application.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="resteasy-openapi"><a class="anchor" href="#resteasy-openapi"></a>RestEasy Jackson/OpenAPI</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The first thing before starting developing the TODO app is registering two new extensions, one for adding the Jackson support so marshelling/unmarshelling operations from/to Java objects from/to JSON documents, happens automatically.</p>
+</div>
+<div class="paragraph">
+<p>Moreover, we&#8217;re going to add the OpenAPI extension so a Swagger UI interface is deployed automatically to test the API.</p>
+</div>
+<div class="paragraph">
+<p>Run the following command in the project directory:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-resteasy-jackson,quarkus-smallrye-openapi"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And both extensions are added:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-resteasy-jackson has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-smallrye-openapi has been installed</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a new class named <code>Todo.java</code> representing the todo data.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+public class Todo {
+    public Long id;
+    public String title;
+    public boolean completed;
+    public int order;
+    public String url;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then create a new REST API resource named <code>TodoResource.java</code> to implement all required operations for a TODO application:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+@Path("/api")
+public class TodoResource {
+
+    private Map&lt;Long, Todo&gt; todos = new HashMap&lt;&gt;(); <i class="conum" data-value="1"></i><b>(1)</b>
+
+    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @GET <i class="conum" data-value="3"></i><b>(3)</b> <i class="conum" data-value="4"></i><b>(4)</b>
+    public List&lt;Todo&gt; getAll() {
+        return new ArrayList&lt;&gt;(todos.values());
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    public Response create(Todo item) { <i class="conum" data-value="5"></i><b>(5)</b>
+        todos.put(item.id, item);
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response update(Todo todo, @PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    public Response deleteCompleted() {
+        todos.entrySet().removeIf(e -&gt; e.getValue().completed);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        todos.remove(id);
+        return Response.noContent().build();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Stores list of Todos in memory</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>List of operations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Marshalling from Java object to JSON is automatically done</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Content Type is automatically set to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Unmarshalling from JSON to object is automatically done</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Start the application again in dev mode running the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw compile quarkus:dev</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the application is running, open a browser and navigate to <a href="http://localhost:8080/q/swagger-ui/" class="bare">http://localhost:8080/q/swagger-ui/</a>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/todo-swagger.png" alt="todo swagger">
+</div>
+</div>
+<div class="paragraph">
+<p>Then open the <strong>POST /api</strong> section and push the <strong>Try It Out</strong> button.
+And use the Swagger UI to insert a new TODO:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/todo-swagger-insert.png" alt="todo swagger insert">
+</div>
+</div>
+<div class="paragraph">
+<p>Or you can use <code>curl</code> for the same thing:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -X 'POST' \
+  'http://localhost:8080/api' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "id": 1,
+  "title": "Quarkus",
+  "completed": false,
+  "order": 0,
+  "url": "quarkus.io"
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also, the same can be used to get the list of TODOs.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/todo-swagger-get.png" alt="todo swagger get">
+</div>
+</div>
+<div class="paragraph">
+<p>Or use <code>curl</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:8080/api</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At this point, we&#8217;ve seen how to test the application backend using Swagger UI.</p>
+</div>
+<div class="paragraph">
+<p>But there is no frontend yet for the application.
+Quarkus let&#8217;s you copy HTML resources to <code>src/main/resources/META-INF/resources</code> directory and serving them as static resources.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve developed a UI for the TODO application, download the zip file containing the <a href="https://github.com/redhat-scholars/kube-native-java-apps/releases/download/TODO-UI/resources.zip">UI</a> from GitHub.</p>
+</div>
+<div class="paragraph">
+<p>In a terminal window, go to <code>src/main/resources/META-INF</code> directory, copy the <code>resourcse.zip</code> file there, and unzip it.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd src/main/resources/META-INF
+
+unzip resources.zip</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Without restarting the application, open a browser and navigate to <a href="http://localhost:8080/todo.html" class="bare">http://localhost:8080/todo.html</a></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/todo-app-f.png" alt="todo app f">
+</div>
+</div>
+<div class="paragraph">
+<p>And you can start interacting with the UI adding TODOs, completing them, &#8230;&#8203;</p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="springboot-compat"><a class="anchor" href="#springboot-compat"></a>Oh you are coming from Spring Boot, no worries</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>In this example, we used JAX-RS annotations and MicroProfile Config annotations for defining the endpoint, but if you are coming from Spring stack, you might find a barrier to learn new annotations.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus offers an integration to Spring annotations, so they are used in the code, and at compilation time they are transformed to "Quarkus" annotations.</p>
+</div>
+<div class="paragraph">
+<p>Go back to the terminal where you started the appication (<code>./mvnw compile quarkus:dev</code>) and stop it.
+Then run the following command to add the integration with Spring stack:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-spring-web,io.quarkus:quarkus-spring-di"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After this addition, we can start using Spring DI and Spring Web MVC annotations.</p>
+</div>
+<div class="paragraph">
+<p>Substitue the <code>GreetingResource.java</code> class with the following content.
+It&#8217;s exactly the same resource but using Spring annotations:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingResource {
+
+    @Value("greeting.message")
+    String msg;
+
+    @GetMapping(path = "/hello")
+    public String hello() {
+        return msg;
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See that only Spring Framework imports are present.
+Start again the application in dev mode and make a request:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw compile quarkus:dev</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:8080/hello</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Hi World</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clean_up"><a class="anchor" href="#_clean_up"></a>Clean Up</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Go back to the terminal where you started the appication (<code>./mvnw compile quarkus:dev</code>) and stop it.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">
