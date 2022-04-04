@@ -2,7 +2,141 @@
 include::_attributes.adoc[]
 
 [#kube-extension]
-== Kubernetes extension
+== Kubernetes Extension
+
+IMPORANT: You need to finish the <<Creating containers>> section before going into Kubernetes section.
+
+=== Deploying to Kubernetes with YAMLs
+
+Deploying to Kubernetes is not done using `kubectl create deployment` approach at production, but creating and applying YAML files.
+
+For example you can express a `Deployment` with the following deployment file:
+
+[source, yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-demo-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: quarkus-demo
+  template:
+    metadata:
+      labels:
+        app: quarkus-demo
+        env: dev
+    spec:
+      containers:
+      - name: quarkus-demo
+        image: quay.io/rhdevelopers/quarkus-demo:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+----
+
+Likewise, you can register a service:
+
+[source, yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: the-service
+spec:
+  selector:
+    app: quarkus-demo
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+----
+
+The creation of these resources are cumbersome as in most of the services the content will be similar, to avoid having to repeat again and again the creation of the same files for all services, Quarkus comes with a Kubernetes extension.
+
+=== Quarkus Kubernetes Extension
+
+Let's add the extension so Quarkus scaffolds automatcally Kubernetes deployment files when packaging the app.
+
+Run the following command in project directory:
+
+[.console-input]
+[source, bash]
+----
+./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-kubernetes"
+----
+
+With the extension added, run the following command to generate the Kubernetes resources:
+
+[.console-input]
+[source, bash]
+----
+./mvnw clean package -DskipTests
+----
+
+After running this command at the `target/kubernetes` directory, Quarkus places a `kubernetes.yaml` and `kubernets.json` files to deploy the application.
+One of the great things about the extension is the integration with container extension seen at <<Creating containers>> section, so `image` tag is pointing out to the image created there.
+
+To deploy the application, we have two options, the first one, applying the resource manually:
+
+[.console-input]
+[source, bash]
+----
+kubectl apply -f target/kubernetes/kubernetes.yml
+----
+
+[.console-output]
+[source, bash]
+----
+service/quarkus-app-workshop created
+deployment.apps/quarkus-app-workshop created
+----
+
+Inspect the deployed pods and services:
+
+[.console-input]
+[source, bash]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source, bash]
+----
+NAME                                    READY   STATUS    RESTARTS   AGE
+quarkus-app-workshop-5b45488995-kck2c   1/1     Running   0          3m5s
+----
+
+[.console-input]
+[source, bash]
+----
+kubectl get services
+----
+
+[.console-output]
+[source, bash]
+----
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+quarkus-app-workshop   ClusterIP   172.30.199.49   <none>        80/TCP    3m23s
+----
+
+Before showing the second way, undeploy the application:
+
+[.console-input]
+[source, bash]
+----
+kubectl delete all --all
+----
+
+The second way is at `package` time using the `quarkus.kubernetes.deploy` property.
+When it's set to true, then Quarkus will create the container and push it (automatically setting `quarkus.container-image.push` property to true if not stated otherwise) to the repository and finally apply the generated resources.
+
+In the terminal run the following command:
+
+
 
 [#customize-resources]
 == Customize created resources
