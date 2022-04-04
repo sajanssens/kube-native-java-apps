@@ -236,9 +236,147 @@
 <article class="doc">
 <h1 class="page">Kubernetes Deployment</h1>
 <div class="sect1">
-<h2 id="kube-extension"><a class="anchor" href="#kube-extension"></a>Kubernetes extension</h2>
+<h2 id="kube-extension"><a class="anchor" href="#kube-extension"></a>Kubernetes Extension</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>IMPORANT: You need to finish the <a href="#Creating containers">[Creating containers]</a> section before going into Kubernetes section.</p>
+</div>
+<div class="sect2">
+<h3 id="_deploying_to_kubernetes_with_yamls"><a class="anchor" href="#_deploying_to_kubernetes_with_yamls"></a>Deploying to Kubernetes with YAMLs</h3>
+<div class="paragraph">
+<p>Deploying to Kubernetes is not done using <code>kubectl create deployment</code> approach at production, but creating and applying YAML files.</p>
+</div>
+<div class="paragraph">
+<p>For example you can express a <code>Deployment</code> with the following deployment file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-demo-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: quarkus-demo
+  template:
+    metadata:
+      labels:
+        app: quarkus-demo
+        env: dev
+    spec:
+      containers:
+      - name: quarkus-demo
+        image: quay.io/rhdevelopers/quarkus-demo:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Likewise, you can register a service:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: the-service
+spec:
+  selector:
+    app: quarkus-demo
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The creation of these resources are cumbersome as in most of the services the content will be similar, to avoid having to repeat again and again the creation of the same files for all services, Quarkus comes with a Kubernetes extension.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_quarkus_kubernetes_extension"><a class="anchor" href="#_quarkus_kubernetes_extension"></a>Quarkus Kubernetes Extension</h3>
+<div class="paragraph">
+<p>Let&#8217;s add the extension so Quarkus scaffolds automatcally Kubernetes deployment files when packaging the app.</p>
+</div>
+<div class="paragraph">
+<p>Run the following command in project directory:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-kubernetes"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the extension added, run the following command to generate the Kubernetes resources:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw clean package -DskipTests</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After running this command at the <code>target/kubernetes</code> directory, Quarkus places a <code>kubernetes.yaml</code> and <code>kubernets.json</code> files to deploy the application.
+One of the great things about the extension is the integration with container extension seen at <a href="#Creating containers">[Creating containers]</a> section, so <code>image</code> tag is pointing out to the image created there.</p>
+</div>
+<div class="paragraph">
+<p>To deploy the application, we have two options, the first one, applying the resource manually:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f target/kubernetes/kubernetes.yml</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">service/quarkus-app-workshop created
+deployment.apps/quarkus-app-workshop created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Inspect the deployed pods and services:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                    READY   STATUS    RESTARTS   AGE
+quarkus-app-workshop-5b45488995-kck2c   1/1     Running   0          3m5s</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get services</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+quarkus-app-workshop   ClusterIP   172.30.199.49   &lt;none&gt;        80/TCP    3m23s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Before showing the second way, undeploy the application:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete all --all</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second way is at <code>package</code> time using the <code>quarkus.kubernetes.deploy</code> property.
+When it&#8217;s set to true, then Quarkus will create the container and push it (automatically setting <code>quarkus.container-image.push</code> property to true if not stated otherwise) to the repository and finally apply the generated resources.</p>
+</div>
+<div class="paragraph">
+<p>In the terminal run the following command:</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
