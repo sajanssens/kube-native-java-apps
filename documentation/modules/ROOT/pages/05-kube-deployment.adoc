@@ -205,7 +205,9 @@ kubectl delete all --all
 ----
 
 [#customize-resources]
-== Customize created resources
+== Customize auto-generated Kubernetes resources
+
+=== Provide additional resources via YAML fragments
 
 Sometimes it's desirable to either provide additional resources, or provide custom values that will be used as a base for the generation process. 
 Those resources can be added under `src/main/kubernetes` directory.
@@ -241,3 +243,50 @@ Finally, regenerate the resources executing the following command:
 ----
 
 If you inspect the `target/kubernetes/kubernetes.yml` content, the service port is 8080.
+
+=== Overwrite generated Kubernetes resources using configurations
+
+You can also overwrite the auto-generated Kubernetes resources by adding different configurations within `application.properties`:
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+quarkus.kubernetes.service-type=load-balancer#<1>
+quarkus.kubernetes.deploy=true#<2>
+quarkus.kubernetes.ingress.expose=true#<3>
+----
+<1> Generate a Kubernes Service of type `LoadBalancer`.
+<2> Deploy to Kubernetes every time the application is packaged.
+<3> Expose via Ingress the deployed resources.
+
+If you inspect again the generated `target/kubernetes/kubernetes.yml`, you should notice that the Service type is changed and Ingress definition is present:
+
+[source, yaml]
+.src/main/kubernetes/kubernetes.yml
+----
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    app.quarkus.io/build-timestamp: 2022-04-07 - 12:22:57 +0000
+  labels:
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  name: todo-app
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: todo-app
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+----
+
+
+
+
+

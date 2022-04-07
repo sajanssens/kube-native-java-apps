@@ -1,8 +1,163 @@
-= Tracing/Logging/Monitoring
+= Observability
 include::_attributes.adoc[]
+
+== Setup
+
+As we will need to correlate our metrics and traces, we should make a small setup for Jaeger, OpenTelemetry Collector and Prometheus.
+
+IMPORTANT: This setup has development purposes and is due to resource constraints that exist within Red Hat OpenShift Developer Sandbox.
+
+First, open in broswer terminal and type the command:
+[.console-input]
+[source,bash]
+----
+curl -O "https://raw.githubusercontent.com/redhat-scholars/kube-native-java-apps/master/apps/kubefiles/{jaeger-server-configmap.yaml,prometheus-configmap.yaml,otel-configmap.yaml,jaeger-deployment.yaml,jaeger-service.yaml,otel-collector-deployment.yaml,prometheus-deployment.yaml}"
+----
+
+This will download the files used to configure Jaeger/Prometheus/OpenTelemetry collector.
+
+Next, please run the following commands in the same terminal:
+
+[.console-input]
+[source,bash]
+----
+kubectl apply -f jaeger-server-configmap.yaml
+kubectl apply -f prometheus-configmap.yaml
+kubectl apply -f otel-configmap.yaml
+kubectl apply -f jaeger-deployment.yaml
+kubectl apply -f jaeger-service.yaml
+kubectl apply -f otel-collector-deployment.yaml
+oc new-app --docker-image=quay.io/prometheus/prometheus:latest
+kubectl replace -f prometheus-deployment.yaml
+oc expose svc prometheus
+oc expose svc jaeger --port=16686 --generator="route/v1"
+----
 
 [#micrometer]
 == Micrometer
+When running applications in production we need to send monitoring information to some services like Prometheus.
+
+Quarkus provides JVM and other statistics out-of-box with the Metrics extension, but it's very valuable for our application to produce its own metrics. Let's see how we can achieve it in this chapter.
+
+Just open a new terminal window, and make sure you’re at the root of your project, then run:
+
+[.console-input]
+[source,bash]
+----
+mvn quarkus:add-extension -Dextensions="io.quarkus:quarkus-micrometer-registry-prometheus"
+----
+
+=== Configuration of common tags
+
+When deploying accross multiple projects/namespaces is always good to have an unified view over some application metrics.
+Let's define several common tags for the application, varying in value at deployment time:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import io.smallrye.config.ConfigMapping;
+
+@ConfigMapping(prefix = "global")
+interface GlobalTagsConfig {
+     String PROFILE = "profile";
+     String REGION = "region";
+     String COUNTRY="country";
+
+     String region();
+     String country();
+}
+----
+
+`@ConfigMapping(prefix = "global")` annotation maps configurations from `application.properties` prefixed by `global`:
+
+[.console-input]
+[source,properties]
+----
+global.region=${REGION:CEE} <1>
+global.country=${COUNTRY:'Romania'}
+----
+
+<1> Environment configuration will be named `REGION` and having the default value `CEE`.
+
+Further, we will propagate these configurations by via `MeterFilter` customization:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.config.MeterFilter;
+import io.quarkus.runtime.configuration.ProfileManager;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+
+@Singleton
+public class CustomConfiguration {
+
+    @Inject
+    GlobalTagsConfig tagsConfig;
+
+    @Produces
+    @Singleton
+    public MeterFilter configureTagsForAll() {
+        return MeterFilter.commonTags(Arrays.asList(
+           Tag.of(GlobalTagsConfig.REGION, tagsConfig.region()),
+           Tag.of(GlobalTagsConfig.COUNTRY, tagsConfig.country()),
+           Tag.of(GlobalTagsConfig.PROFILE, ProfileManager.getActiveProfile())
+        ));
+    }
+
+}
+----
+
+=== Metrics definition at endpoint level
+
+In `application.properties` please add the following configurations:
+
+[.console-input]
+[source,properties]
+----
+quarkus.micrometer.binder.http-client.enabled=true#<1>
+quarkus.micrometer.binder.http-server.enabled=true#<2>
+quarkus.micrometer.binder.system=true#<3> 
+quarkus.micrometer.export.prometheus.enabled=true#<4>
+quarkus.micrometer.export.prometheus.path=/metrics#<5>
+quarkus.micrometer.binder.jvm=true#<6>
+----
+<1> Outbound HTTP request metrics support.
+<2> Inboud HTTP request metrics support.
+<3> Micrometer System metrics support.
+<4> Enable export of metrics to Prometheus.
+<5> Customize the path where metrics are exposed.
+<6> Micrometer JVM metrics support.
+
+Go to the http://localhost:8080/q/swagger-ui/#/Todo%20Resource/get_api[Swagger UI] and make several requests.
+
+Now go to http://localhost:8080/metrics[http://localhost:8080/metrics] and search for `http_server_requests_seconds summary`. You will observe that your requests were automatically measured and they also contain the global tags:
+
+[.console-output]
+[source, bash]
+----
+# TYPE http_server_requests_seconds summary
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 12.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 2.058467696
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 2.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 0.075653411
+----
+
+The metrics listed will be exported to Prometheus and further queried over time.
+You can also define your own custom metrics, but please keep in mind the Out Of the Box ones as well.
+
+
+
+
+
 
 [#logger]
 == Logger

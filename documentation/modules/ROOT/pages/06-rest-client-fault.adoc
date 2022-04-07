@@ -1,15 +1,537 @@
 = Rest Client & Fault Tolerance
 include::_attributes.adoc[]
 
-
-[#deploy-remote-service]
-== Deploy What’s Time service
-
-using Sandbox +Add button (Kube YAML, Dockerfile, Container Image)
+In this section we will initialize the ToDo application with some activities from `https://www.boredapi.com`.
+As this external service is not under our control, we can achieve the goal of resilience by adding features like retries, fallbacks, and circuit breakers. 
+Luckily for us, Quarkus provides these features for us through the fault tolerance extension.
 
 [#rest-client]
 == Create Rest Client
 
-[#fault-tolerance]
-== Fault tolerance on communication with What’s Time service
+=== Add the REST Client extension
 
+To consume the external service we need to add the rest-client extension:
+In the terminal window please execute the following command
+:
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client"
+----
+
+=== Consuming a REST endpoint
+
+As mentioned in the goals of this section, at application startup we would like to have some already defined activities.
+We can do that by consuming ideas of activities from an external service.
+
+Will start by modifying the `Todo.java` class to help when reading the data from the external service:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+@JsonIgnoreProperties(ignoreUnknown = true)//<1>
+public class Todo {
+    public Long id;
+
+    @JsonSetter("activity")//<2>
+    public String title;
+    
+    public boolean completed;
+    public int order;
+    
+    @JsonSetter("link")
+    public String url;
+}
+----
+<1> The properties that are defined in the external service but not mapped within the class will be ignored.
+<2> Assign to `title` field the value had by the `activity` JSON property.
+
+And now let's define an interface and register it as a REST client:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    Todo getActivity();
+
+}
+----
+
+`@RegisterRestClient` allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client.
+To have more flexibility in our configuration, will the rest of the URL in in `src/main/resources/application.properties`:
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+quarkus.rest-client."org.acme.ActivityService".url=https://www.boredapi.com
+----
+
+Now we can use the `ActivityService.java` in our `Todo` resource to have some predefined activities:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+@Path("/api")
+public class TodoResource {
+
+    private final Map<Long, Todo> todos = new HashMap<>();
+
+    @RestClient//<1>
+    ActivityService service;
+
+    @PostConstruct//<2>
+    public void init() {
+       for (long i = 0; i < 10; i++) {
+           todos.put(i, service.getActivity() );
+       }
+    }
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @GET
+    public List<Todo> getAll() {
+        return new ArrayList<>(todos.values());
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    public Response create(Todo item) {
+        todos.put(item.id, item);
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response update(Todo todo, @PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    public Response deleteCompleted() {
+        todos.entrySet().removeIf(e -> e.getValue().completed);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        todos.remove(id);
+        return Response.noContent().build();
+    }
+}
+----
+<1>  Reference the REST service API accessible through `ActivityService.java`.
+<2>  Initialize the `todos` map after dependency injection is done.
+
+
+[#fault-tolerance]
+== Fault tolerance on communication with external API 
+
+=== Add the Fault Tolerance extension
+
+Just open a new terminal window, and make sure you’re at the root of your project, then run:
+
+[.console-input]
+[source,bash]
+----
+mvn quarkus:add-extension -Dextension=quarkus-smallrye-fault-tolerance
+----
+
+
+=== Add Retry to ActivityService
+
+Let's add the retry policy in `ActivityViceService`.
+
+Change the `ActivityService` Java interface in `src/main/java` in the `org.acme` package with the following contents:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    Todo getActivity();
+
+}
+----
+
+Now in case of any error, 3 retries are done automatically, waiting for 2 seconds between retries.
+
+=== Invoke the endpoint with Retry
+
+Run the following command:
+
+[.console-input]
+[source,bash]
+----
+curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'
+----
+
+The output should be similar to the following:
+
+[.console-output]
+[source,json]
+----
+[
+  {
+    "id": null,
+    "title": "Learn how to make a website",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Do a jigsaw puzzle",
+    "completed": false,
+    "order": 0,
+    "link": "https://en.wikipedia.org/wiki/Jigsaw_puzzle"
+  },
+  {
+    "id": null,
+    "title": "Start a garden",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Bake something you've never tried before",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Learn how to write in shorthand",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Do yoga",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Take a class at your local community center that interests you",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Have a jam session with your friends",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Learn calligraphy",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Wash your car",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  }
+]
+----
+
+No change from calls done previously, but now switch off your network so you do not have access to  https://www.boredapi.com.
+
+Run the following command again:
+
+[.console-input]
+[source,bash]
+----
+curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'
+----
+
+Now after waiting 6 seconds (3 retries x 2 seconds), the next exception is thrown `java.net.UnknownHostException: https://www.boredapi.com`.
+
+=== Add Fallback to ActivityService
+
+Let's add a fallback policy in case of an error in `ActivityService`.
+
+Change the `ActivityService` Java interface in `src/main/java` in the `org.acme` package with the following contents:
+
+[.console-input]
+[source,java]
+----
+package org.acme;
+
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    @Fallback(TodoFallback.class)
+    Todo getActivity();
+
+    public static class TodoFallback implements FallbackHandler<Todo> {
+
+        private static final Todo EMPTY_TODO = new Todo();
+
+        @Override
+        public Todo handle(ExecutionContext context) {
+            return EMPTY_TODO;
+        }
+
+    }
+
+}
+----
+
+Now in case of any error, 3 retries are done automatically, waiting for 2 seconds between retries.
+If the error persists, then the fallback method is executed.
+
+Now after waiting for 6 seconds (3 retries x 2 seconds), an empty object is sent instead of an exception.
+
+=== Invoke the endpoint with Retry and Fallback
+
+Run the following command:
+
+[.console-input]
+[source,bash]
+----
+curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'
+----
+
+[.console-output]
+[source,json]
+----
+[
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  }
+]
+----
+
+=== Add Circuit Breaker to ActivityService
+
+Let's add the circuit breaker policy in `ActivityService`.
+
+Change the `ActivityService` Java interface in `src/main/java` in the `org.acme` package with the following contents:
+
+[.console-input]
+[source,java]
+----
+ppackage org.acme;
+
+import org.eclipse.microprofile.faulttolerance.*;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 5000)
+    Todo getActivity();
+
+}
+----
+
+Now, if 3 (4 x 0.75) failures occur among the rolling window of 4 consecutive invocations, then the circuit is opened for 5000 ms and then will be back to half open.
+If the invocation succeeds, then the circuit is back to closed again.
+
+Run the following command at least 5 times:
+
+[.console-input]
+[source,bash]
+----
+curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'
+----
+
+The output changes from `java.net.UnknownHostException: https://www.boredapi.com` (or any other network exception) in the first calls to `org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException: getActivity` when the circuit is opened.
+
+The big difference between the first exception and the second one is that the first one occurs because the circuit is closed while the system is trying to reach the host, while in the second one, the circuit is closed and the exception is thrown automatically without trying to reach the host.
+
+TIP: You can use `@Retry` and `@Fallback` annotations together with `@CircuitBreaker` annotation.
+
+IMPORTANT: If you turned your network off for this chapter, remember to turn it back on again after you finished the exercises for this chapter.

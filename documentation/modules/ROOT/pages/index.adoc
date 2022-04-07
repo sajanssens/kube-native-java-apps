@@ -39,20 +39,20 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 [.tile]
 .xref:05-kube-deployment.adoc[Kubernetes Deployment]
 * xref:05-kube-deployment.adoc#kube-extension[Kubernetes extension]
-* xref:05-kube-deployment.adoc#customize-resources[Customize created resources]
+* xref:05-kube-deployment.adoc#customize-resources[Customize auto-generated Kubernetes resources]
 
 [.tile]
 .xref:06-rest-client-fault.adoc[Rest Client & Fault Tolerance]
-* xref:06-rest-client-fault.adoc#deploy-remote-service[Deploy What’s Time service]
 * xref:06-rest-client-fault.adoc#rest-client[Create Rest Client]
-* xref:06-rest-client-fault.adoc#fault-tolerance[Fault tolerance on communication with What’s Time service]
+* xref:06-rest-client-fault.adoc#fault-tolerance[Fault tolerance on communication with external API]
 
 [.tile]
 .xref:07-kube-advanced.adoc[Kubernetes Advanced]
+* .xref:07-kube-advanced.adoc[Integration tests to avoid Kubernetes YAML issues][#kube-integration-tests]
 
 [.tile]
 .xref:08-quarkus-cloud-native.adoc[Quarkus Cloud Native]
-* xref:08-quarkus-cloud-native.adoc#limits[Add Resource Limits]
+* xref:08-quarkus-cloud-native.adoc#limits[Adjust Resource Limits]
 * xref:08-quarkus-cloud-native.adoc#health[Health check extension]
 
 [.tile]
@@ -64,7 +64,7 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 * xref:09-panache.adoc#show-db-down[Scale Down DB]
 
 [.tile]
-.xref:10-metrics.adoc[Tracing/Logging/Monitoring]
+.xref:10-metrics.adoc[Observability]
 * xref:10-metrics.adoc#micrometer[Micrometer]
 * xref:10-metrics.adoc#logger[Logger]
 * xref:10-metrics.adoc#jaeger[Jaeger]
