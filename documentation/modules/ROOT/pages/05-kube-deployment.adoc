@@ -4,7 +4,7 @@ include::_attributes.adoc[]
 [#kube-extension]
 == Kubernetes Extension
 
-IMPORANT: You need to finish the <<Creating containers>> section before going into Kubernetes section.
+IMPORTANT: You need to finish the <<Creating containers>> section before going into Kubernetes section.
 
 === Deploying to Kubernetes with YAMLs
 
