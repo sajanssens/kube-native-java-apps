@@ -1,0 +1,28 @@
+apiVersion: v1
+data:
+  sampling_strategies.json: |-
+    {
+      "service_strategies": [
+        {
+          "service": "todo-app-jvm",
+          "type": "probabilistic",
+          "param": 0.8
+        }
+      ],
+      "default_strategy": {
+        "type": "constant",
+        "param": 1
+      }
+    }
+  jaeger-ui.json: |-
+    {
+      "monitor": {
+        "menuEnabled": true
+      },
+      "dependencies": {
+        "menuEnabled": true
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: jaeger-server-conf
