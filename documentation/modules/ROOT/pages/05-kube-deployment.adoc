@@ -61,7 +61,7 @@ The creation of these resources are cumbersome as in most of the services the co
 
 Let's add the extension so Quarkus scaffolds automatcally Kubernetes deployment files when packaging the app.
 
-Run the following command in project directory:
+Run the following command in the project directory:
 
 [.console-input]
 [source, bash]
@@ -136,8 +136,108 @@ When it's set to true, then Quarkus will create the container and push it (autom
 
 In the terminal run the following command:
 
+[.console-input]
+[source, bash]
+----
+./mvnw clean package -DskipTests -Dquarkus.kubernetes.deploy=true
+----
 
+[.console-output]
+[source, bash]
+----
+....
+[INFO] --- quarkus-maven-plugin:2.7.5.Final:build (default) @ todo-app ---
+[INFO] Checking for existing resources in: /Users/asotobu/git/kube-native-java-apps/apps/todo-app/src/main/kubernetes.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Starting (local) container image build for jar using jib.
+[WARNING] [io.quarkus.container.image.jib.deployment.JibProcessor] Base image 'registry.access.redhat.com/ubi8/openjdk-11-runtime:1.11' does not use a specific image digest - build may not be reproducible
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] LogEvent [level=INFO, message=trying docker-credential-desktop for quay.io]
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] LogEvent [level=LIFECYCLE, message=Using credentials from Docker config (/Users/asotobu/.docker/config.json) for quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT]
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Using base image with digest: sha256:0aca47bf03430b5ee5033d67ba9b38871470af00fa7d80a38c1cc0ae34270935
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Container entrypoint set to [java, -Djava.util.logging.manager=org.jboss.logmanager.LogManager, -jar, quarkus-run.jar]
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Created container image quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT (sha256:da549c4785e018c8830c1d61f544372abedfd5896812f6f11eff20713adac7b4)
+
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Deploying to kubernetes server: https://api.sandbox.x8i5.p1.openshiftapps.com:6443/ in namespace: asotobue-dev.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service quarkus-app-workshop.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Deployment quarkus-app-workshop.
+[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 11640ms
+----
+
+Application is packaged, containerized, pushed to container registry, and finally, deployed to configured cluster.
+
+Inspect the deployed pods and services:
+
+[.console-input]
+[source, bash]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source, bash]
+----
+NAME                                    READY   STATUS    RESTARTS   AGE
+quarkus-app-workshop-8547f6bbc-9gb5w   1/1     Running   0          33m
+----
+
+[.console-input]
+[source, bash]
+----
+kubectl get services
+----
+
+[.console-output]
+[source, bash]
+----
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+quarkus-app-workshop   ClusterIP   172.30.199.49   <none>        80/TCP    3m23s
+----
+
+Before showing the second way, undeploy the application:
+
+[.console-input]
+[source, bash]
+----
+kubectl delete all --all
+----
 
 [#customize-resources]
 == Customize created resources
 
+Sometimes it's desirable to either provide additional resources, or provide custom values that will be used as a base for the generation process. 
+Those resources can be added under `src/main/kubernetes` directory.
+
+Suppose you want to change the default exposed port in the generated service from `80` (the default one) to `8080`.
+
+Create the `src/main/kubernetes` directory with a file named `kubernetes.yml`.
+
+[source, yaml]
+.src/main/kubernetes/kubernetes.yml
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: quarkus-app-workshop
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: quarkus-app-workshop
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+----
+
+Finally, regenerate the resources executing the following command:
+
+[.console-input]
+[source, bash]
+----
+./mvnw clean package -DskipTests
+----
+
+If you inspect the `target/kubernetes/kubernetes.yml` content, the service port is 8080.

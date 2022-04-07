@@ -1,10 +1,9 @@
 package org.acme;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -16,10 +15,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.quarkus.panache.common.Sort;
+
 @Path("/api")
 public class TodoResource {
-
-    private Map<Long, Todo> todos = new HashMap<>();
 
     @OPTIONS
     public Response opt() {
@@ -28,13 +27,13 @@ public class TodoResource {
 
     @GET
     public List<Todo> getAll() {
-        return new ArrayList<>(todos.values());
+        return Todo.listAll(Sort.by("order"));
     }
 
     @GET
     @Path("/{id}")
     public Todo getOne(@PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+        Todo entity = Todo.findById(id);
         if (entity == null) {
             throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
         }
@@ -42,15 +41,17 @@ public class TodoResource {
     }
 
     @POST
-    public Response create(Todo item) {
-        todos.put(item.id, item);
+    @Transactional
+    public Response create(@Valid Todo item) {
+        item.persist();
         return Response.status(Status.CREATED).entity(item).build();
     }
 
     @PATCH
     @Path("/{id}")
-    public Response update(Todo todo, @PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+    @Transactional
+    public Response update(@Valid Todo todo, @PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
         entity.id = id;
         entity.completed = todo.completed;
         entity.order = todo.order;
@@ -60,19 +61,22 @@ public class TodoResource {
     }
 
     @DELETE
+    @Transactional
     public Response deleteCompleted() {
-        todos.entrySet().removeIf(e -> e.getValue().completed);
+        Todo.deleteCompleted();
         return Response.noContent().build();
     }
 
     @DELETE
+    @Transactional
     @Path("/{id}")
     public Response deleteOne(@PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+        Todo entity = Todo.findById(id);
         if (entity == null) {
             throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
         }
-        todos.remove(id);
+        entity.delete();
         return Response.noContent().build();
     }
+
 }
