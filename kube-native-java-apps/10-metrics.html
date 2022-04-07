@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Tracing/Logging/Monitoring :: Kube-Native Java Apps</title>
+    <title>Observability :: Kube-Native Java Apps</title>
     <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/kube-native-java-apps/10-metrics.html">
     <link rel="prev" href="09-panache.html">
     <link rel="next" href="11-serverless.html">
@@ -123,13 +123,19 @@
     <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#deploy-remote-service">Deploy What’s Time service</a>
-  </li>
-  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with What’s Time service</a>
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
   </li>
 </ul>
   </li>
@@ -138,7 +144,7 @@
     <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Add Resource Limits</a>
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
@@ -168,7 +174,7 @@
   </li>
   <li class="nav-item is-current-page" data-depth="0">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="10-metrics.html">Tracing/Logging/Monitoring</a>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="#micrometer">Micrometer</a>
@@ -226,18 +232,218 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Tutorial</a></li>
-    <li><a href="10-metrics.html">Tracing/Logging/Monitoring</a></li>
+    <li><a href="10-metrics.html">Observability</a></li>
   </ul>
 </nav>
   <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/10-metrics.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <article class="doc">
-<h1 class="page">Tracing/Logging/Monitoring</h1>
+<h1 class="page">Observability</h1>
+<div class="sect1">
+<h2 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As we will need to correlate our metrics and traces, we should make a small setup for Jaeger, OpenTelemetry Collector and Prometheus.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This setup has development purposes and is due to resource constraints that exist within Red Hat OpenShift Developer Sandbox.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First, open in broswer terminal and type the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -O "https://raw.githubusercontent.com/redhat-scholars/kube-native-java-apps/master/apps/kubefiles/{jaeger-server-configmap.yaml,prometheus-configmap.yaml,otel-configmap.yaml,jaeger-deployment.yaml,jaeger-service.yaml,otel-collector-deployment.yaml,prometheus-deployment.yaml}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will download the files used to configure Jaeger/Prometheus/OpenTelemetry collector.</p>
+</div>
+<div class="paragraph">
+<p>Next, please run the following commands in the same terminal:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f jaeger-server-configmap.yaml
+kubectl apply -f prometheus-configmap.yaml
+kubectl apply -f otel-configmap.yaml
+kubectl apply -f jaeger-deployment.yaml
+kubectl apply -f jaeger-service.yaml
+kubectl apply -f otel-collector-deployment.yaml
+oc new-app --docker-image=quay.io/prometheus/prometheus:latest
+kubectl replace -f prometheus-deployment.yaml
+oc expose svc prometheus
+oc expose svc jaeger --port=16686 --generator="route/v1"</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="micrometer"><a class="anchor" href="#micrometer"></a>Micrometer</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>When running applications in production we need to send monitoring information to some services like Prometheus.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus provides JVM and other statistics out-of-box with the Metrics extension, but it&#8217;s very valuable for our application to produce its own metrics. Let&#8217;s see how we can achieve it in this chapter.</p>
+</div>
+<div class="paragraph">
+<p>Just open a new terminal window, and make sure you’re at the root of your project, then run:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn quarkus:add-extension -Dextensions="io.quarkus:quarkus-micrometer-registry-prometheus"</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_of_common_tags"><a class="anchor" href="#_configuration_of_common_tags"></a>Configuration of common tags</h3>
+<div class="paragraph">
+<p>When deploying accross multiple projects/namespaces is always good to have an unified view over some application metrics.
+Let&#8217;s define several common tags for the application, varying in value at deployment time:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+import io.smallrye.config.ConfigMapping;
+
+@ConfigMapping(prefix = "global")
+interface GlobalTagsConfig {
+     String PROFILE = "profile";
+     String REGION = "region";
+     String COUNTRY="country";
+
+     String region();
+     String country();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>@ConfigMapping(prefix = "global")</code> annotation maps configurations from <code>application.properties</code> prefixed by <code>global</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">global.region=${REGION:CEE} <i class="conum" data-value="1"></i><b>(1)</b>
+global.country=${COUNTRY:'Romania'}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Environment configuration will be named <code>REGION</code> and having the default value <code>CEE</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Further, we will propagate these configurations by via <code>MeterFilter</code> customization:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.config.MeterFilter;
+import io.quarkus.runtime.configuration.ProfileManager;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+
+@Singleton
+public class CustomConfiguration {
+
+    @Inject
+    GlobalTagsConfig tagsConfig;
+
+    @Produces
+    @Singleton
+    public MeterFilter configureTagsForAll() {
+        return MeterFilter.commonTags(Arrays.asList(
+           Tag.of(GlobalTagsConfig.REGION, tagsConfig.region()),
+           Tag.of(GlobalTagsConfig.COUNTRY, tagsConfig.country()),
+           Tag.of(GlobalTagsConfig.PROFILE, ProfileManager.getActiveProfile())
+        ));
+    }
+
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_metrics_definition_at_endpoint_level"><a class="anchor" href="#_metrics_definition_at_endpoint_level"></a>Metrics definition at endpoint level</h3>
+<div class="paragraph">
+<p>In <code>application.properties</code> please add the following configurations:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.micrometer.binder.http-client.enabled=true<i class="conum" data-value="1"></i><b>(1)</b>
+quarkus.micrometer.binder.http-server.enabled=true<i class="conum" data-value="2"></i><b>(2)</b>
+quarkus.micrometer.binder.system=true<i class="conum" data-value="3"></i><b>(3)</b>
+quarkus.micrometer.export.prometheus.enabled=true<i class="conum" data-value="4"></i><b>(4)</b>
+quarkus.micrometer.export.prometheus.path=/metrics<i class="conum" data-value="5"></i><b>(5)</b>
+quarkus.micrometer.binder.jvm=true<i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Outbound HTTP request metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inboud HTTP request metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Micrometer System metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Enable export of metrics to Prometheus.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Customize the path where metrics are exposed.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Micrometer JVM metrics support.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Go to the <a href="http://localhost:8080/q/swagger-ui/#/Todo%20Resource/get_api">Swagger UI</a> and make several requests.</p>
+</div>
+<div class="paragraph">
+<p>Now go to <a href="http://localhost:8080/metrics">http://localhost:8080/metrics</a> and search for <code>http_server_requests_seconds summary</code>. You will observe that your requests were automatically measured and they also contain the global tags:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># TYPE http_server_requests_seconds summary
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 12.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 2.058467696
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 2.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 0.075653411</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The metrics listed will be exported to Prometheus and further queried over time.
+You can also define your own custom metrics, but please keep in mind the Out Of the Box ones as well.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">

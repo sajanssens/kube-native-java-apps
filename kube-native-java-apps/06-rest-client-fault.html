@@ -6,7 +6,7 @@
     <title>Rest Client &amp; Fault Tolerance :: Kube-Native Java Apps</title>
     <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/kube-native-java-apps/06-rest-client-fault.html">
     <link rel="prev" href="05-kube-deployment.html">
-    <link rel="next" href="08-quarkus-cloud-native.html">
+    <link rel="next" href="07-kube-advanced.html">
     <meta name="generator" content="Antora 3.0.0">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -123,13 +123,19 @@
     <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="#deploy-remote-service">Deploy What’s Time service</a>
-  </li>
-  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="#rest-client">Create Rest Client</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="#fault-tolerance">Fault tolerance on communication with What’s Time service</a>
+    <a class="nav-link" href="#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
   </li>
 </ul>
   </li>
@@ -138,7 +144,7 @@
     <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Add Resource Limits</a>
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
@@ -168,7 +174,7 @@
   </li>
   <li class="nav-item" data-depth="0">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="10-metrics.html">Tracing/Logging/Monitoring</a>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
@@ -234,29 +240,611 @@
   <div class="content">
 <article class="doc">
 <h1 class="page">Rest Client &amp; Fault Tolerance</h1>
-<div class="sect1">
-<h2 id="deploy-remote-service"><a class="anchor" href="#deploy-remote-service"></a>Deploy What’s Time service</h2>
+<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>using Sandbox +Add button (Kube YAML, Dockerfile, Container Image)</p>
+<p>In this section we will initialize the ToDo application with some activities from <code><a href="https://www.boredapi.com" class="bare">https://www.boredapi.com</a></code>.
+As this external service is not under our control, we can achieve the goal of resilience by adding features like retries, fallbacks, and circuit breakers.
+Luckily for us, Quarkus provides these features for us through the fault tolerance extension.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="rest-client"><a class="anchor" href="#rest-client"></a>Create Rest Client</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_add_the_rest_client_extension"><a class="anchor" href="#_add_the_rest_client_extension"></a>Add the REST Client extension</h3>
+<div class="paragraph">
+<p>To consume the external service we need to add the rest-client extension:
+In the terminal window please execute the following command
+:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_consuming_a_rest_endpoint"><a class="anchor" href="#_consuming_a_rest_endpoint"></a>Consuming a REST endpoint</h3>
+<div class="paragraph">
+<p>As mentioned in the goals of this section, at application startup we would like to have some already defined activities.
+We can do that by consuming ideas of activities from an external service.</p>
+</div>
+<div class="paragraph">
+<p>Will start by modifying the <code>Todo.java</code> class to help when reading the data from the external service:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+@JsonIgnoreProperties(ignoreUnknown = true)<i class="conum" data-value="1"></i><b>(1)</b>
+public class Todo {
+    public Long id;
+
+    @JsonSetter("activity")<i class="conum" data-value="2"></i><b>(2)</b>
+    public String title;
+
+    public boolean completed;
+    public int order;
+
+    @JsonSetter("link")
+    public String url;
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The properties that are defined in the external service but not mapped within the class will be ignored.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Assign to <code>title</code> field the value had by the <code>activity</code> JSON property.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And now let&#8217;s define an interface and register it as a REST client:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    Todo getActivity();
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>@RegisterRestClient</code> allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client.
+To have more flexibility in our configuration, will the rest of the URL in in <code>src/main/resources/application.properties</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">quarkus.rest-client."org.acme.ActivityService".url=https://www.boredapi.com</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can use the <code>ActivityService.java</code> in our <code>Todo</code> resource to have some predefined activities:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+@Path("/api")
+public class TodoResource {
+
+    private final Map&lt;Long, Todo&gt; todos = new HashMap&lt;&gt;();
+
+    @RestClient<i class="conum" data-value="1"></i><b>(1)</b>
+    ActivityService service;
+
+    @PostConstruct<i class="conum" data-value="2"></i><b>(2)</b>
+    public void init() {
+       for (long i = 0; i &lt; 10; i++) {
+           todos.put(i, service.getActivity() );
+       }
+    }
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @GET
+    public List&lt;Todo&gt; getAll() {
+        return new ArrayList&lt;&gt;(todos.values());
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    public Response create(Todo item) {
+        todos.put(item.id, item);
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response update(Todo todo, @PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    public Response deleteCompleted() {
+        todos.entrySet().removeIf(e -&gt; e.getValue().completed);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        todos.remove(id);
+        return Response.noContent().build();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Reference the REST service API accessible through <code>ActivityService.java</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initialize the <code>todos</code> map after dependency injection is done.</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="fault-tolerance"><a class="anchor" href="#fault-tolerance"></a>Fault tolerance on communication with What’s Time service</h2>
+<h2 id="fault-tolerance"><a class="anchor" href="#fault-tolerance"></a>Fault tolerance on communication with external API</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_add_the_fault_tolerance_extension"><a class="anchor" href="#_add_the_fault_tolerance_extension"></a>Add the Fault Tolerance extension</h3>
+<div class="paragraph">
+<p>Just open a new terminal window, and make sure you’re at the root of your project, then run:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn quarkus:add-extension -Dextension=quarkus-smallrye-fault-tolerance</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_retry_to_activityservice"><a class="anchor" href="#_add_retry_to_activityservice"></a>Add Retry to ActivityService</h3>
+<div class="paragraph">
+<p>Let&#8217;s add the retry policy in <code>ActivityViceService</code>.</p>
+</div>
+<div class="paragraph">
+<p>Change the <code>ActivityService</code> Java interface in <code>src/main/java</code> in the <code>org.acme</code> package with the following contents:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    Todo getActivity();
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now in case of any error, 3 retries are done automatically, waiting for 2 seconds between retries.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_invoke_the_endpoint_with_retry"><a class="anchor" href="#_invoke_the_endpoint_with_retry"></a>Invoke the endpoint with Retry</h3>
+<div class="paragraph">
+<p>Run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output should be similar to the following:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
+  {
+    "id": null,
+    "title": "Learn how to make a website",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Do a jigsaw puzzle",
+    "completed": false,
+    "order": 0,
+    "link": "https://en.wikipedia.org/wiki/Jigsaw_puzzle"
+  },
+  {
+    "id": null,
+    "title": "Start a garden",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Bake something you've never tried before",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Learn how to write in shorthand",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Do yoga",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Take a class at your local community center that interests you",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Have a jam session with your friends",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Learn calligraphy",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  },
+  {
+    "id": null,
+    "title": "Wash your car",
+    "completed": false,
+    "order": 0,
+    "link": ""
+  }
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No change from calls done previously, but now switch off your network so you do not have access to  <a href="https://www.boredapi.com" class="bare">https://www.boredapi.com</a>.</p>
+</div>
+<div class="paragraph">
+<p>Run the following command again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now after waiting 6 seconds (3 retries x 2 seconds), the next exception is thrown <code>java.net.UnknownHostException: <a href="https://www.boredapi.com" class="bare">https://www.boredapi.com</a></code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_fallback_to_activityservice"><a class="anchor" href="#_add_fallback_to_activityservice"></a>Add Fallback to ActivityService</h3>
+<div class="paragraph">
+<p>Let&#8217;s add a fallback policy in case of an error in <code>ActivityService</code>.</p>
+</div>
+<div class="paragraph">
+<p>Change the <code>ActivityService</code> Java interface in <code>src/main/java</code> in the <code>org.acme</code> package with the following contents:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    @Fallback(TodoFallback.class)
+    Todo getActivity();
+
+    public static class TodoFallback implements FallbackHandler&lt;Todo&gt; {
+
+        private static final Todo EMPTY_TODO = new Todo();
+
+        @Override
+        public Todo handle(ExecutionContext context) {
+            return EMPTY_TODO;
+        }
+
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now in case of any error, 3 retries are done automatically, waiting for 2 seconds between retries.
+If the error persists, then the fallback method is executed.</p>
+</div>
+<div class="paragraph">
+<p>Now after waiting for 6 seconds (3 retries x 2 seconds), an empty object is sent instead of an exception.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_invoke_the_endpoint_with_retry_and_fallback"><a class="anchor" href="#_invoke_the_endpoint_with_retry_and_fallback"></a>Invoke the endpoint with Retry and Fallback</h3>
+<div class="paragraph">
+<p>Run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  },
+  {
+    "id": null,
+    "title": null,
+    "completed": false,
+    "order": 0,
+    "url": null
+  }
+]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_circuit_breaker_to_activityservice"><a class="anchor" href="#_add_circuit_breaker_to_activityservice"></a>Add Circuit Breaker to ActivityService</h3>
+<div class="paragraph">
+<p>Let&#8217;s add the circuit breaker policy in <code>ActivityService</code>.</p>
+</div>
+<div class="paragraph">
+<p>Change the <code>ActivityService</code> Java interface in <code>src/main/java</code> in the <code>org.acme</code> package with the following contents:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ppackage org.acme;
+
+import org.eclipse.microprofile.faulttolerance.*;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import javax.inject.Singleton;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@RegisterRestClient
+@Path("/api/activity")
+@Singleton
+public interface ActivityService {
+
+    @GET
+    Todo getActivityByType(@QueryParam("type") String type);
+
+    @GET
+    @Retry(maxRetries = 3, delay = 2000)
+    @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 5000)
+    Todo getActivity();
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, if 3 (4 x 0.75) failures occur among the rolling window of 4 consecutive invocations, then the circuit is opened for 5000 ms and then will be back to half open.
+If the invocation succeeds, then the circuit is back to closed again.</p>
+</div>
+<div class="paragraph">
+<p>Run the following command at least 5 times:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -X 'GET' 'http://localhost:8080/api' -H 'accept: application/json'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output changes from <code>java.net.UnknownHostException: <a href="https://www.boredapi.com" class="bare">https://www.boredapi.com</a></code> (or any other network exception) in the first calls to <code>org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException: getActivity</code> when the circuit is opened.</p>
+</div>
+<div class="paragraph">
+<p>The big difference between the first exception and the second one is that the first one occurs because the circuit is closed while the system is trying to reach the host, while in the second one, the circuit is closed and the exception is thrown automatically without trying to reach the host.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can use <code>@Retry</code> and <code>@Fallback</code> annotations together with <code>@CircuitBreaker</code> annotation.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If you turned your network off for this chapter, remember to turn it back on again after you finished the exercises for this chapter.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="05-kube-deployment.html">Kubernetes Deployment</a></span>
-  <span class="next"><a href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a></span>
+  <span class="next"><a href="07-kube-advanced.html">Kubernetes Advanced</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">

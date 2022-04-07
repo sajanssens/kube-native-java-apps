@@ -123,13 +123,19 @@
     <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#deploy-remote-service">Deploy What’s Time service</a>
-  </li>
-  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with What’s Time service</a>
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
   </li>
 </ul>
   </li>
@@ -138,7 +144,7 @@
     <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Add Resource Limits</a>
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
@@ -168,7 +174,7 @@
   </li>
   <li class="nav-item" data-depth="0">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="10-metrics.html">Tracing/Logging/Monitoring</a>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
@@ -452,8 +458,10 @@ quarkus-app-workshop   ClusterIP   172.30.199.49   &lt;none&gt;        80/TCP   
 </div>
 </div>
 <div class="sect1">
-<h2 id="customize-resources"><a class="anchor" href="#customize-resources"></a>Customize created resources</h2>
+<h2 id="customize-resources"><a class="anchor" href="#customize-resources"></a>Customize auto-generated Kubernetes resources</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_provide_additional_resources_via_yaml_fragments"><a class="anchor" href="#_provide_additional_resources_via_yaml_fragments"></a>Provide additional resources via YAML fragments</h3>
 <div class="paragraph">
 <p>Sometimes it&#8217;s desirable to either provide additional resources, or provide custom values that will be used as a base for the generation process.
 Those resources can be added under <code>src/main/kubernetes</code> directory.</p>
@@ -492,6 +500,64 @@ spec:
 </div>
 <div class="paragraph">
 <p>If you inspect the <code>target/kubernetes/kubernetes.yml</code> content, the service port is 8080.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_overwrite_generated_kubernetes_resources_using_configurations"><a class="anchor" href="#_overwrite_generated_kubernetes_resources_using_configurations"></a>Overwrite generated Kubernetes resources using configurations</h3>
+<div class="paragraph">
+<p>You can also overwrite the auto-generated Kubernetes resources by adding different configurations within <code>application.properties</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">quarkus.kubernetes.service-type=load-balancer<i class="conum" data-value="1"></i><b>(1)</b>
+quarkus.kubernetes.deploy=true<i class="conum" data-value="2"></i><b>(2)</b>
+quarkus.kubernetes.ingress.expose=true<i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Generate a Kubernes Service of type <code>LoadBalancer</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Deploy to Kubernetes every time the application is packaged.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Expose via Ingress the deployed resources.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you inspect again the generated <code>target/kubernetes/kubernetes.yml</code>, you should notice that the Service type is changed and Ingress definition is present:</p>
+</div>
+<div class="listingblock">
+<div class="title">src/main/kubernetes/kubernetes.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    app.quarkus.io/build-timestamp: 2022-04-07 - 12:22:57 +0000
+  labels:
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  name: todo-app
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: todo-app
+                port:
+                  name: http
+            path: /
+            pathType: Prefix</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>

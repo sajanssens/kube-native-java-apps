@@ -122,13 +122,19 @@
     <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#deploy-remote-service">Deploy What’s Time service</a>
-  </li>
-  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with What’s Time service</a>
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
   </li>
 </ul>
   </li>
@@ -137,7 +143,7 @@
     <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Add Resource Limits</a>
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
@@ -167,7 +173,7 @@
   </li>
   <li class="nav-item" data-depth="0">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="10-metrics.html">Tracing/Logging/Monitoring</a>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
@@ -305,7 +311,7 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 <p><a href="05-kube-deployment.html#kube-extension" class="xref page">Kubernetes extension</a></p>
 </li>
 <li>
-<p><a href="05-kube-deployment.html#customize-resources" class="xref page">Customize created resources</a></p>
+<p><a href="05-kube-deployment.html#customize-resources" class="xref page">Customize auto-generated Kubernetes resources</a></p>
 </li>
 </ul>
 </div>
@@ -313,21 +319,26 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 <div class="title"><a href="06-rest-client-fault.html" class="xref page">Rest Client &amp; Fault Tolerance</a></div>
 <ul>
 <li>
-<p><a href="06-rest-client-fault.html#deploy-remote-service" class="xref page">Deploy What’s Time service</a></p>
-</li>
-<li>
 <p><a href="06-rest-client-fault.html#rest-client" class="xref page">Create Rest Client</a></p>
 </li>
 <li>
-<p><a href="06-rest-client-fault.html#fault-tolerance" class="xref page">Fault tolerance on communication with What’s Time service</a></p>
+<p><a href="06-rest-client-fault.html#fault-tolerance" class="xref page">Fault tolerance on communication with external API</a></p>
 </li>
 </ul>
 </div>
-<div class="ulist tile tile">
+<div class="ulist tile">
+<div class="title"><a href="07-kube-advanced.html" class="xref page">Kubernetes Advanced</a></div>
+<ul>
+<li>
+<p>.<a href="07-kube-advanced.html" class="xref page">Integration tests to avoid Kubernetes YAML issues</a>[#kube-integration-tests]</p>
+</li>
+</ul>
+</div>
+<div class="ulist tile">
 <div class="title"><a href="08-quarkus-cloud-native.html" class="xref page">Quarkus Cloud Native</a></div>
 <ul>
 <li>
-<p><a href="08-quarkus-cloud-native.html#limits" class="xref page">Add Resource Limits</a></p>
+<p><a href="08-quarkus-cloud-native.html#limits" class="xref page">Adjust Resource Limits</a></p>
 </li>
 <li>
 <p><a href="08-quarkus-cloud-native.html#health" class="xref page">Health check extension</a></p>
@@ -355,7 +366,7 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 </ul>
 </div>
 <div class="ulist tile">
-<div class="title"><a href="10-metrics.html" class="xref page">Tracing/Logging/Monitoring</a></div>
+<div class="title"><a href="10-metrics.html" class="xref page">Observability</a></div>
 <ul>
 <li>
 <p><a href="10-metrics.html#micrometer" class="xref page">Micrometer</a></p>
