@@ -1,5 +1,5 @@
-name: template-tutorial
-title: Template Tutorial
+name: kube-native-java-apps
+title: Tutorial
 version: master
 nav:
   - modules/ROOT/nav.adoc

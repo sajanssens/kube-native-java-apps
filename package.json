@@ -1,7 +1,7 @@
 {
-  "name": "rhs-openshift-admins-devops",
-  "description": "OpenShift Admins Devops Course Documentation Site",
-  "homepage": "https://redhat-scholars.github.io/openshift-admins-devops",
+  "name": "rhs-kube-native-java-apps",
+  "description": "Best Practices for Kube-Native Java Apps",
+  "homepage": "https://redhat-scholars.github.io/kube-native-java-apps",
   "author": {
     "email": "kamesh.sampath@hotmail.com",
     "name": "Kamesh Sampath",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redhat-scholars/openshift-admins-devops.git"
+    "url": "git+https://github.com/redhat-scholars/kube-native-java-apps.git"
   },
   "license": "Apache-2.0",
   "babel": {

@@ -4,7 +4,7 @@ runtime:
 site:
   title: Best Practices for Kube-Native Java Apps
   url: http://localhost:3000/rhs-build-course/index.html
-  start_page: template-tutorial::index.adoc
+  start_page: kube-native-java-apps::index.adoc
 
 content:
   sources:
@@ -14,6 +14,7 @@ content:
 asciidoc:
   attributes:
     title: Best Practices for Kube-Native Java Apps
+    page-pagination: true
   extensions:
     - ./lib/remote-include-processor.js
     - ./lib/tab-block.js
