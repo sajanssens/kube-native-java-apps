@@ -311,7 +311,7 @@ spec:
 <p>Let&#8217;s add the extension so Quarkus scaffolds automatcally Kubernetes deployment files when packaging the app.</p>
 </div>
 <div class="paragraph">
-<p>Run the following command in project directory:</p>
+<p>Run the following command in the project directory:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -384,13 +384,115 @@ When it&#8217;s set to true, then Quarkus will create the container and push it 
 <div class="paragraph">
 <p>In the terminal run the following command:</p>
 </div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw clean package -DskipTests -Dquarkus.kubernetes.deploy=true</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">....
+[INFO] --- quarkus-maven-plugin:2.7.5.Final:build (default) @ todo-app ---
+[INFO] Checking for existing resources in: /Users/asotobu/git/kube-native-java-apps/apps/todo-app/src/main/kubernetes.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Starting (local) container image build for jar using jib.
+[WARNING] [io.quarkus.container.image.jib.deployment.JibProcessor] Base image 'registry.access.redhat.com/ubi8/openjdk-11-runtime:1.11' does not use a specific image digest - build may not be reproducible
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] LogEvent [level=INFO, message=trying docker-credential-desktop for quay.io]
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeploy] Kubernetes API Server at 'https://api.sandbox.x8i5.p1.openshiftapps.com:6443/' successfully contacted.
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] LogEvent [level=LIFECYCLE, message=Using credentials from Docker config (/Users/asotobu/.docker/config.json) for quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT]
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Using base image with digest: sha256:0aca47bf03430b5ee5033d67ba9b38871470af00fa7d80a38c1cc0ae34270935
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Container entrypoint set to [java, -Djava.util.logging.manager=org.jboss.logmanager.LogManager, -jar, quarkus-run.jar]
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Created container image quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT (sha256:da549c4785e018c8830c1d61f544372abedfd5896812f6f11eff20713adac7b4)
+
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Deploying to kubernetes server: https://api.sandbox.x8i5.p1.openshiftapps.com:6443/ in namespace: asotobue-dev.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service quarkus-app-workshop.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Deployment quarkus-app-workshop.
+[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 11640ms</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Application is packaged, containerized, pushed to container registry, and finally, deployed to configured cluster.</p>
+</div>
+<div class="paragraph">
+<p>Inspect the deployed pods and services:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                    READY   STATUS    RESTARTS   AGE
+quarkus-app-workshop-8547f6bbc-9gb5w   1/1     Running   0          33m</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get services</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+quarkus-app-workshop   ClusterIP   172.30.199.49   &lt;none&gt;        80/TCP    3m23s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Before showing the second way, undeploy the application:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl delete all --all</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="customize-resources"><a class="anchor" href="#customize-resources"></a>Customize created resources</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>Sometimes it&#8217;s desirable to either provide additional resources, or provide custom values that will be used as a base for the generation process.
+Those resources can be added under <code>src/main/kubernetes</code> directory.</p>
+</div>
+<div class="paragraph">
+<p>Suppose you want to change the default exposed port in the generated service from <code>80</code> (the default one) to <code>8080</code>.</p>
+</div>
+<div class="paragraph">
+<p>Create the <code>src/main/kubernetes</code> directory with a file named <code>kubernetes.yml</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">src/main/kubernetes/kubernetes.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: quarkus-app-workshop
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: quarkus-app-workshop
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally, regenerate the resources executing the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw clean package -DskipTests</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you inspect the <code>target/kubernetes/kubernetes.yml</code> content, the service port is 8080.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">
