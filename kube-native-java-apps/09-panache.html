@@ -167,9 +167,6 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="#show-healths">Show Health Checks</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="#show-db-down">Scale Down DB</a>
-  </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="0">
@@ -618,13 +615,30 @@ spec:
 <div class="sect1">
 <h2 id="show-healths"><a class="anchor" href="#show-healths"></a>Show Health Checks</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>Health check extension registers a special readiness health check for databases when using Panache extension.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how the application is become in not ready state when the database is stopped.
+Open Topology view, select the PostgreSQL deployment, and go to <strong>Details</strong> tab.
+There scale down the Pod to 0 instances by clicking the arrow as shown in the following figure:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/devsandbox-psql-scale-down.png" alt="devsandbox psql scale down">
 </div>
 </div>
-<div class="sect1">
-<h2 id="show-db-down"><a class="anchor" href="#show-db-down"></a>Show that if DB is down Pod is not ready anymore</h2>
-<div class="sectionbody">
-
+<div class="paragraph">
+<p>Then wait some seconds and you&#8217;ll see that the aplication becomes not ready as the readiness check fails.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/devsandbox-app-not-ready.png" alt="devsandbox app not ready">
+</div>
+</div>
+<div class="paragraph">
+<p>Scaling up the PostgreSQL instance will make the application be ready again.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">
