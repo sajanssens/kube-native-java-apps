@@ -52,7 +52,6 @@
 [.tile]
 .xref:10-metrics.adoc[Observability]
 * xref:10-metrics.adoc#micrometer[Micrometer]
-* xref:10-metrics.adoc#logger[Logger]
 * xref:10-metrics.adoc#jaeger[Jaeger]
 
 [.tile]

@@ -15,8 +15,8 @@ data:
       - job_name: aggregated-trace-metrics
         static_configs:
           - targets: ['otel-collector:8889']
-      - job_name: 'hobby'
+      - job_name: 'todo'
         metrics_path: '/metrics'
         scrape_interval: 3s
         static_configs:
-          - targets: [ 'todo-app-jvm:8080' ]
+          - targets: [ 'todo-app-jvm:80' ]
