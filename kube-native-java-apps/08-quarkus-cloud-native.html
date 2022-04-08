@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Quarkus Cloud Native :: Kube-Native Java Apps</title>
+    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/kube-native-java-apps/08-quarkus-cloud-native.html">
+    <link rel="prev" href="07-kube-advanced.html">
+    <link rel="next" href="09-panache.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://github.com/redhat-scholars/kube-native-java-apps">Kube-Native Java Apps</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="kube-native-java-apps" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">Get Started</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="01-setup.html#prerequisite">Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-bootstrap.html">Bootstrap Quarkus App</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#devmode">Quarkus dev mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#continuous-testing">Quarkus Continuous Testing</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#configuration">Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#resteasy-openapi">RestEasy Jackson/OpenAPI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#springboot-compat">Spring Boot migration</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-kube-intro.html">Introduction to Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#sandbox">Getting your OpenShift Sandbox account</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#quay">Getting your Quay account</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-containers.html">Creating containers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#dockerfile">Using Dockerfile</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#jib">Using Jib</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#buildpacks">Using Buildpacks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="05-kube-deployment.html">Kubernetes Deployment</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#kube-extension">Kubernetes extension</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#customize-resources">Customize created resources</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#limits">Adjust Resource Limits</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#health">Health check extension</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="09-panache.html">Hibernate Panache</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#panache-apps">Create Panache Applications</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#dev-services">Dev services</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#deploy-db">Deploy Database in the sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#show-healths">Show Health Checks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#jaeger">Jaeger</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="11-serverless.html">Going Serverless</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#knative-intro">Intro to Knative</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#servelessing-service">Serverlessing a service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#native-compile">Compile to native</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#deploy-native">Deploy</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="12-bonus-track.html">BONUS - Kafka</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#managed-kafka">Create a Managed Kafka instance</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#deploy-quarkus-sb">Deploy app in Quarkus using Kafka and Service Binding</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#knative-eventing">Knative Eventing</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Tutorial</a></li>
+    <li><a href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/08-quarkus-cloud-native.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Quarkus Cloud Native</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+You need to finish the <a href="#Kubernetes Deployment">[Kubernetes Deployment]</a> section before advancing into adjusting resources.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default, containers run with unbounded compute resources on a Kubernetes cluster. Developer Sandbox is a managed OpenShift environment, its cluster resources are tailored per development needs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="limits"><a class="anchor" href="#limits"></a>Discovering project resource limits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With resource quotas, cluster administrators can restrict resource consumption and creation on a namespace basis.
+There will always be concerns that one Pod or Container could monopolize all available resources.
+To avoid that, within a namespace, a Pod or Container can consume as much CPU and memory as defined by the <code>namespace&#8217;s/project&#8217;s</code> resource quota.</p>
+</div>
+<div class="paragraph">
+<p>To discover the resource quota established for your namespace/project you can run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get resourcequota
+kubectl get limitrange</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At namespace/project level a LimitRange policy is employed to constrain resource allocations (to Pods or Containers).
+You can find out the LimitRange established for a namespace by running <code>oc get limitrange</code> and ask for its description via:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl describe limitrange resource-limits</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output should be something similar to:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">Name:       resource-limits
+Namespace:  &lt;your-user&gt;-dev
+Type        Resource  Min  Max  Default Request  Default Limit  Max Limit/Request Ratio
+----        --------  ---  ---  ---------------  -------------  -----------------------
+Container   cpu       -    -    10m              1              -
+Container   memory    -    -    64Mi             750Mi          -</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above LimitRange has enforced the default request/limit for compute resources in the namespace and automatically injects them to Containers at runtime.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adjusting_container_resources"><a class="anchor" href="#_adjusting_container_resources"></a>Adjusting container resources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By using a tool called <a href="https://github.com/rakyll/hey">hey</a>, you can run a simple load test on your server and see how your system performs under different circumstances.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s expose the service deployed in <a href="#Kubernetes Deployment">[Kubernetes Deployment]</a> section by using the browser terminal and type:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc todo-app-jvm</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s run a hey command against the route exposed by previous deployment:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')
+hey -n 1000 -c 200 $ROUTE_URL/api</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the Developer Sandbox click on <code>Observe</code> and select the <code>Metric</code> tab.
+You can select CPU Usage or Memory Usage query to check the resources consumed by each of your pods:</p>
+</div>
+<div class="imageblock text-center mt-4 center">
+<div class="content">
+<img src="_images/cpu_usage.png" alt="CPU Usage" width="600" height="600">
+</div>
+</div>
+<div class="imageblock text-center mt-4 center">
+<div class="content">
+<img src="_images/memory_usage.png" alt="Memory Usage" width="600" height="600">
+</div>
+</div>
+<div class="paragraph">
+<p>Based on that you can adjust your container resources in <code>application.properties</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties"># Configuration file
+
+quarkus.kubernetes.resources.limits.cpu=200m
+quarkus.kubernetes.resources.limits.memory=280Mi
+quarkus.kubernetes.resources.requests.cpu=100m
+quarkus.kubernetes.resources.requests.memory=140Mi</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The resources in <code>target/kubernetes</code> folder will be reworked at compile time and contain these new definitions.</p>
+</div>
+<div class="paragraph">
+<p>You can now re-deploy the changes by using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">mvn clean package -Dquarkus.kubernetes.deploy=true -Dquarkus.container-image.push=true</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="health"><a class="anchor" href="#health"></a>Define custom health checks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_add_the_health_monitoring_extension"><a class="anchor" href="#_add_the_health_monitoring_extension"></a>Add the health monitoring extension</h3>
+<div class="paragraph">
+<p>In the terminal window please execute the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-smallrye-health"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you did not stop DevMode and inspect again <code>target/kubernetes/kubernetes.yml</code>, you
+will notice that it had changed. Your <code>Deployment</code> resource will contain a few lines like to:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: tutorial-app
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can access these endpoints also in your local at <a href="http://localhost:8080/q/health/ready" class="bare">http://localhost:8080/q/health/ready</a> or <a href="http://localhost:8080/q/health/live" class="bare">http://localhost:8080/q/health/live</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_default_health_checks"><a class="anchor" href="#_default_health_checks"></a>Default health checks</h3>
+<div class="paragraph">
+<p>In dev mode, all your heath checks are visible in health UI: <a href="http://localhost:8080/q/health-ui/" class="bare">http://localhost:8080/q/health-ui/</a>.</p>
+</div>
+<div class="paragraph">
+<p>Some extensions may provide default health checks, including that the extension will automatically register its health checks.
+For example, <code>quarkus-agroal</code> (that is used to manage Quarkus datasources)  automatically registers a readiness health check that will validate each datasource.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus has automatic readiness probes added when you use certain extensions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>datasource</strong>
+A probe to check database connection status.</p>
+</li>
+<li>
+<p><strong>kafka</strong>
+A probe to check kafka connection status. In this case you need to enable manually by setting quarkus.kafka.health.enabled to true.</p>
+</li>
+<li>
+<p><strong>mongoDB</strong>
+A probe to check MongoDB connection status.</p>
+</li>
+<li>
+<p><strong>neo4j</strong>
+A probe to check Neo4J connection status.</p>
+</li>
+<li>
+<p><strong>artemis</strong>
+A probe to check Artemis JMS connection status.</p>
+</li>
+<li>
+<p><strong>kafka-streams</strong>
+Liveness (for stream state) and Readiness (topics created) probes.</p>
+</li>
+<li>
+<p><strong>vault</strong>
+A probe to check Vault conection status.</p>
+</li>
+<li>
+<p><strong>gRPC</strong>
+A readiness probe for the gRPC services.</p>
+</li>
+<li>
+<p><strong>Cassandra</strong>
+A readiness probe to check Cassandra connection status.</p>
+</li>
+<li>
+<p><strong>Redis</strong>
+A readiness probe to check Redis connection status.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_customize_health_endpoints_and_readiness_probe"><a class="anchor" href="#_customize_health_endpoints_and_readiness_probe"></a>Customize health endpoints and readiness probe</h3>
+<div class="paragraph">
+<p>You can change the root path to the health endpoints by setting the following property in <code>src/main/resources/application.properties</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">quarkus.smallrye-health.root-path=/health</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Quarkus Kubernetes extension will take into account your custom probe definitions when generating their YAML.
+If you reload the context in DevMode (by pressing <code>s</code>), you would notice that your Kubernetes/OpenShift manifests have changed and take into account your new configuration.</p>
+</div>
+<div class="paragraph">
+<p>We can customize a readiness probe to check the availability of the endpoint <code><a href="https://www.boredapi.com" class="bare">https://www.boredapi.com</a></code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import io.smallrye.health.checks.UrlHealthCheck;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.Readiness;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.HttpMethod;
+
+@ApplicationScoped
+public class CustomHealthCheck {
+
+    @ConfigProperty(name = "quarkus.rest-client.\"org.acme.ActivityService\".url")
+    String externalURL;
+
+    @Readiness <i class="conum" data-value="1"></i><b>(1)</b>
+    HealthCheck checkURL() {
+        return new UrlHealthCheck(externalURL) <i class="conum" data-value="2"></i><b>(2)</b>
+                .name("external-url-check").requestMethod(HttpMethod.GET).statusCode(200);
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the method with <code>org.eclipse.microprofile.health.Readiness</code> to signal its implementation.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>UrlHealthCheck</code> checks if host is reachable using a Http URL connection.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Quarkus comes with some HealthCheck implementations for you to check status of different components:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SocketHealthCheck: checks if host is reachable using a socket.</p>
+</li>
+<li>
+<p>UrlHealthCheck: checks if host is reachable using a Http URL connection.</p>
+</li>
+<li>
+<p>InetAddressHealthCheck: checks if host is reachable using InetAddress.isReachable method.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="07-kube-advanced.html">Kubernetes Advanced</a></span>
+  <span class="next"><a href="09-panache.html">Hibernate Panache</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

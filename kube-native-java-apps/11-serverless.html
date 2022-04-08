@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Quarkus Serverless with Knative :: Kube-Native Java Apps</title>
+    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/kube-native-java-apps/11-serverless.html">
+    <link rel="prev" href="10-metrics.html">
+    <link rel="next" href="12-bonus-track.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://github.com/redhat-scholars/kube-native-java-apps">Kube-Native Java Apps</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="kube-native-java-apps" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">Get Started</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="01-setup.html#prerequisite">Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-bootstrap.html">Bootstrap Quarkus App</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#devmode">Quarkus dev mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#continuous-testing">Quarkus Continuous Testing</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#configuration">Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#resteasy-openapi">RestEasy Jackson/OpenAPI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#springboot-compat">Spring Boot migration</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-kube-intro.html">Introduction to Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#sandbox">Getting your OpenShift Sandbox account</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#quay">Getting your Quay account</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-containers.html">Creating containers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#dockerfile">Using Dockerfile</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#jib">Using Jib</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#buildpacks">Using Buildpacks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="05-kube-deployment.html">Kubernetes Deployment</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#kube-extension">Kubernetes extension</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#customize-resources">Customize created resources</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="09-panache.html">Hibernate Panache</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#panache-apps">Create Panache Applications</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#dev-services">Dev services</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#deploy-db">Deploy Database in the sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#show-healths">Show Health Checks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#micrometer">Micrometer</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="10-metrics.html#jaeger">Jaeger</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="11-serverless.html">Going Serverless</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#knative-intro">Intro to Knative</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#servelessing-service">Serverlessing a service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#native-compile">Compile to native</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#deploy-native">Deploy</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="12-bonus-track.html">BONUS - Kafka</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#managed-kafka">Create a Managed Kafka instance</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#deploy-quarkus-sb">Deploy app in Quarkus using Kafka and Service Binding</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#knative-eventing">Knative Eventing</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Tutorial</a></li>
+    <li><a href="11-serverless.html">Going Serverless</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/11-serverless.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Quarkus Serverless with Knative</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/knative/client">Knative Client</a> is the command line utility aimed at enhancing the developer experience when doing Knative Serving and Eventing tasks.</p>
+</div>
+<div class="paragraph">
+<p>At the end of this chapter you will be able to :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Install Knative Client</p>
+</li>
+<li>
+<p>Create, update, list and delete Knative service</p>
+</li>
+<li>
+<p>Create, update, list and delete Knative service revisions</p>
+</li>
+<li>
+<p>List Knative service routes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Install <code>kn</code> by using command line section in RedHat Sandbox:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/devsandbox-kn-cli.png" alt="devsandbox kn cli">
+</div>
+</div>
+<div class="paragraph">
+<p>Download it, unzip it and put in an accessible directory.</p>
+</div>
+<div class="paragraph">
+<p>Verify installation by running the command:</p>
+</div>
+<div id="kn-verify-install" class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn version</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above command will return a response like</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">Version:      {kn-client-version}
+Build Date:   2021-12-14T12:31:50Z
+Git Revision: 530841f1
+Supported APIs:
+* Serving
+  - serving.knative.dev/v1 (knative-serving )
+* Eventing
+  - sources.knative.dev/v1 (knative-eventing )
+  - eventing.knative.dev/v1 (knative-eventing )</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="knative-intro"><a class="anchor" href="#knative-intro"></a>Intro to Knative</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="kn-create-ksvc"><a class="anchor" href="#kn-create-ksvc"></a>Create Service</h3>
+<div class="paragraph">
+<p>To create the <code>greeter</code> service using <code>kn</code> run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service create greeter \
+  --image quay.io/rhdevelopers/knative-tutorial-greeter:quarkus</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A successful create of the <code>greeter</code> service should show a response like</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Creating service 'greeter' in namespace 'knativetutorial':
+
+  0.028s The Configuration is still working to reflect the latest desired specification.
+  0.097s The Route is still working to reflect the latest desired specification.
+  0.120s Configuration "greeter" is waiting for a Revision to become ready.
+ 12.075s ...
+ 12.128s Ingress has not yet been reconciled.
+ 12.223s unsuccessfully observed a new generation
+ 12.378s Ready to serve.
+
+Service 'greeter' created to latest revision 'greeter-zyjrq-1' is available at URL:
+http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="kn-list-services"><a class="anchor" href="#kn-list-services"></a>List Knative Services</h3>
+<div class="paragraph">
+<p>You can list the created services using the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service list</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME      <mark>URL</mark>                                                   LATEST            AGE   CONDITIONS   READY   REASON
+greeter   http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com  greeter-sxnzq-1   10m   3 OK / 3     True</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl <a href="http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com" class="bare">http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com</a></code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Hi  greeter =&gt; '9861675f8845' : 1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>List the Pods:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                          READY   STATUS      RESTARTS   AGE
+greeter-stdvk-1-deployment-5cbd996d7f-mbmjq   2/2     Running     0          49s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The greeter Pod is deployed, now wait for 60 seconds and list the Pods again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No <code>greeter-stdvk-1-deployment-5cbd996d7f-mbmjq</code> Pod is shown as it has been automatically scaled to 0.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl <a href="http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com" class="bare">http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com</a></code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Hi  greeter =&gt; '9861675f8845' : 1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Autoamtically a new instance is scaled up when the request comes to the cluster.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_delete_knative_service"><a class="anchor" href="#_delete_knative_service"></a>Delete Knative Service</h3>
+<div class="paragraph">
+<p>You can also use <code>kn</code> to delete the service that were created, to delete the service named <code>greeter</code> run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service delete greeter</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Service 'greeter' successfully deleted in namespace ''.</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_traffic_distribution"><a class="anchor" href="#_traffic_distribution"></a>Traffic Distribution</h3>
+<div class="paragraph">
+<p>To explore the goals of this chapter, we will be using a colors service called <code>blue-green-canary</code>, and we&#8217;ll deploy using YAML files instead of using <code>kn</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">colors-service-blue.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: blue-green-canary
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/rhdevelopers/blue-green-canary
+          env:
+            - name: BLUE_GREEN_CANARY_COLOR
+              value: "#6bbded"
+            - name: BLUE_GREEN_CANARY_MESSAGE
+              value: "Hello"</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f colors-service-blue.yaml</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_invoke_the_service"><a class="anchor" href="#_invoke_the_service"></a>Invoke the Service</h4>
+<div class="paragraph">
+<p>Get the service URL,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service describe blue-green-canary -o url</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use the URL to open the service in a browser window.If the service was deployed correctly you should see blue background browser page, with greeting as <strong>Hello</strong>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/blue-green-canary-blue.png" alt="blue green canary blue">
+</div>
+<div class="title">Figure 1. Blue Green Canary::Blue</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deploy_a_new_revision_of_a_service"><a class="anchor" href="#_deploy_a_new_revision_of_a_service"></a>Deploy a New Revision of a Service</h3>
+<div class="paragraph">
+<p>Let us now change the configuration of the service by updating the service environment variable BLUE_GREEN_CANARY_COLOR to make the browser display green color with greeting text as Namaste.</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">colors-service-green.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: blue-green-canary
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/rhdevelopers/blue-green-canary
+          env:
+            - name: BLUE_GREEN_CANARY_COLOR
+              value: "#5bbf45"
+            - name: BLUE_GREEN_CANARY_MESSAGE
+              value: "Namaste"</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f colors-service-green.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now invoking the service again using the service URL, will show a green color browser page with greeting Namaste.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/blue-green-canary-green.png" alt="blue green canary green">
+</div>
+<div class="title">Figure 2. Blue Green Canary::Green</div>
+</div>
+<div class="sect3">
+<h4 id="_revisions"><a class="anchor" href="#_revisions"></a>Revisions</h4>
+<div class="paragraph">
+<p>Check to ensure you have two revisions of the blue-green-canary service:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn revision list</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                        SERVICE             TRAFFIC   TAGS   GENERATION   AGE     CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%             2            2m33s   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary                    1            30m     3 OK / 4     True</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tag_revisions"><a class="anchor" href="#_tag_revisions"></a>Tag Revisions</h3>
+<div class="paragraph">
+<p>As you had observed that the Knative service <code>blue-green-canary</code> now has two revisions namely <strong>blue-green-canary-00001</strong> and <strong>blue-green-canary-00002</strong>. As the Revision names are autogenerated it is hard to comprehend to which code/configuration set it corresponds to. To overcome this problem Knative provides <strong>tagging</strong> of revision names that allows one to tag a revision name to a logical human understanable names called <strong>tags</strong>.</p>
+</div>
+<div class="paragraph">
+<p>As our colors service shows different colors on the browser let us tag the revisions with color,</p>
+</div>
+<div class="paragraph">
+<p>List the existing revisions,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn revision list -s blue-green-canary</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                        SERVICE             TRAFFIC   TAGS   GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%             2            23m   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary                    1            51m   3 OK / 4     True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When Knative rolls out a new revision, it increments the <code>GENERATION</code> by <strong>1</strong> and then routes <strong>100%</strong> of the <code>TRAFFIC</code> to it, hence we can use the <code>GENERATION</code> or <code>TRAFFIC</code> to identify the latest reivsion.</p>
+</div>
+<div class="sect3">
+<h4 id="_tag_blue"><a class="anchor" href="#_tag_blue"></a>Tag Blue</h4>
+<div class="paragraph">
+<p>Let us tag <code>blue-green-canary-00001</code> which shows <strong>blue</strong> browser page with tag name <code>blue</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service update blue-green-canary --tag=<mark>blue-green-canary-00001</mark>=blue</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tag_green"><a class="anchor" href="#_tag_green"></a>Tag Green</h4>
+<div class="paragraph">
+<p>Let us tag <code>blue-green-canary-00002</code> which shows <strong>green</strong> browser page with tag name <code>green</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service update blue-green-canary --tag=<mark>blue-green-canary-00002</mark>=green</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tag_latest"><a class="anchor" href="#_tag_latest"></a>Tag Latest</h4>
+<div class="paragraph">
+<p>Lets tag whatever revision that is latest to be tagged as <strong>latest</strong>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service update blue-green-canary --tag=@latest=latest</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let us query the Service Revisions again,</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn revision list -s blue-green-canary</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                        SERVICE             TRAFFIC   TAGS    GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%      <mark>latest,green</mark>   2            29m   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary             <mark>blue</mark>    1            57m   3 OK / 4     True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As <strong>green</strong> happend to be latest revision it has been tagged with name <code>lastest</code> in addition to <code>green</code>.</p>
+</div>
+<div class="paragraph">
+<p>Let us use the tag names for easier identification of the revision and perform traffic distribution amongst them.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_applying_blue_green_deployment_pattern"><a class="anchor" href="#_applying_blue_green_deployment_pattern"></a>Applying Blue-Green Deployment Pattern</h3>
+<div class="paragraph">
+<p>Knative offers a simple way of switching 100% of the traffic from one Knative service revision (blue) to another newly rolled out revision (green). If the new revision (e.g. green) has erroneous behavior then it is easy to rollback the change.</p>
+</div>
+<div class="paragraph">
+<p>In this exercise you will applying the Blue/Green deployment pattern with the Knative Service called greeter. You have already deployed two <a href="#deploying-revisions">revisions</a> of blue-green-canary identified using the tags  <code>blue</code> and <code>green</code>.</p>
+</div>
+<div class="paragraph">
+<p>With the deployment of <strong>green</strong> revison you noticed that Knative automatically started to routing 100% of the traffic to <code>blue-green-canary-00002</code>.</p>
+</div>
+<div class="paragraph">
+<p>Now let us assume, due to a critical bug  we need to roll back <code>green</code> to <code>blue</code>.</p>
+</div>
+<div class="paragraph">
+<p>The following Knative Service YAML is identical to the previously deployed <code>green</code> except that we have added the <em>traffic</em> section to indicate that 100% of the traffic should be routed to <code>blue</code>.</p>
+</div>
+<div class="paragraph">
+<p>Before you rollback the revision, refresh the browser window where you have opened the blue-green-canary service, to make sure it is still showing <strong>green</strong> browser page with greeting <strong>Namaste</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Now apply the update Knative service configuration using the command as shown in following listing:</p>
+</div>
+<div class="sect3">
+<h4 id="_rollback_to_blue"><a class="anchor" href="#_rollback_to_blue"></a>Rollback to blue</h4>
+<div class="paragraph">
+<p>Route all the traffic of service <code>blue-green-canary</code> to blue revision of the service:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service update blue-green-canary --traffic blue=100,green=0,latest=0</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We use the tag names to identify the revisions
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let us list all revisions with tags:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn revision list</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Based on the revision tags that we created earlier, the output should be like:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME                        SERVICE             TRAFFIC   TAGS           GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary             latest,green   2            56m   4 OK / 4     True
+blue-green-canary-00001   blue-green-canary   <mark>100%</mark>      <mark>blue</mark>           1            83m   4 OK / 4     True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let us list the available sub-routes:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get ksvc blue-green-canary -oyaml \
+ | yq r - 'status.traffic[*].url'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above command should return you three sub-routes for the main <code>greeter</code> route:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"><a href="http://latest-blue-green-canary.knativetutorial.192.168.64.13.nip.io" class="bare">http://latest-blue-green-canary.knativetutorial.192.168.64.13.nip.io</a> <i class="conum" data-value="1"></i><b>(1)</b>
+<a href="http://blue-blue-green-canary.knativetutorial.192.168.64.13.nip.io" class="bare">http://blue-blue-green-canary.knativetutorial.192.168.64.13.nip.io</a> <i class="conum" data-value="2"></i><b>(2)</b>
+<a href="http://green-blue-green-canary.knativetutorial.192.168.64.13.nip.io" class="bare">http://green-blue-green-canary.knativetutorial.192.168.64.13.nip.io</a>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the sub route for the traffic tag <code>latest</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the sub route for the traffic tag <code>blue</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the sub route for the traffic tag <code>green</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You will notice that the command does not create any new configuration/revision/deployment as there was no application update (e.g. image tag, env var, etc), but when you call the service, Knative scales up the <code>blue</code> that shows <strong>blue</strong> browser page with greeting <strong>Hello</strong>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/blue-green-canary-blue.png" alt="blue green canary blue">
+</div>
+<div class="title">Figure 3. Blue Green Canary::Blue</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                     READY   STATUS        RESTARTS   AGE
+blue-green-canary-00001-deployment-54597d94b9-25x4r#   2/2     Running       0          12s
+blue-green-canary-00002-deployment-6cb545df65-ktqc2   0/2     Terminating   0          2m</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since <code>blue</code> is the active revision now, the existing <code>green</code> pod is getting terminated as no future requests will be served by it.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>As an exercise, flip all the traffic back to <code>green</code> using <code>kn</code> command.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_applying_canary_release_pattern"><a class="anchor" href="#_applying_canary_release_pattern"></a>Applying Canary Release Pattern</h4>
+<div class="paragraph">
+<p>A Canary release is more effective when you want to reduce the risk of introducing new feature. It allows you a more effective feature-feedback loop before rolling out the change to your entire user base.</p>
+</div>
+<div class="paragraph">
+<p>Knative allows you to split the traffic between revisions in increments as small as 1%.</p>
+</div>
+<div class="paragraph">
+<p>To see this in action, apply the following Knative service definition that will split the traffic 80% to 20% between <code>blue</code> and <code>green</code>.</p>
+</div>
+<div class="paragraph">
+<p>To roll out the greeter canary deployment use the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">Create greeter canary Deployment</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service update blue-green-canary \
+  --traffic="blue=80" \
+  --traffic="green=20"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As in the previous section on <a href="#blue-green">[blue-green]</a> deployments, the command will not create any new configuration/revision/deployment. To observe the traffic distribution, open the Service Route URL in your browser window.</p>
+</div>
+<div class="paragraph">
+<p>You will notice the browser alternating betwee green and blue color, with majority of the time staying with blue.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/blue-green-canary.gif" alt="blue green canary">
+</div>
+</div>
+<div class="paragraph">
+<p>You should also notice that two pods are running representing both <code>blue</code> and <code>green</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                                                    READY   STATUS    RESTARTS   AGE
+blue-green-canary-00001-deployment-54597d94b9-q8c57   2/2     Running   0          79s
+blue-green-canary-00002-deployment-8564bf5b5b-gtvh4   2/2     Running   0          14s</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cleanup"><a class="anchor" href="#_cleanup"></a>Cleanup</h4>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service delete blue-green-canary</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="servelessing-service"><a class="anchor" href="#servelessing-service"></a>Serverlessing Todo Service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the key aspects of services running under serverless architecture, is the startup time.
+This application might take around 6 seconds to start in the RedHat Sandbox machines.</p>
+</div>
+<div class="paragraph">
+<p>This is fine for long-running services, but in serverless where the cluster might start and stop the service pretty often, the startup time becomes important.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus integrates with GraalVM to compile the Java application into native binary file speeding up the start up times and the usage memory.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="native-compile"><a class="anchor" href="#native-compile"></a>Compile to native</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Start your local Docker/Podman/CRI-O instance, and run the following command in the terminal to compile to native, create a container image and push it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./mvnw clean package -DskipTests -Pnative -Dquarkus.native.container-build=true -Dquarkus.container-image.push=true -Dquarkus.container-image.tag=1.0.0-SNAPSHOT-native</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We override the tag value to <code>1.0.0-SNAPSHOT-native</code> to have both JVM and native containers correctly tagged.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="deploy-native"><a class="anchor" href="#deploy-native"></a>Deploy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To deploy the application as a KNative service, create a new file with name <code>service.yaml</code> with the following content:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">service.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: quarkus-app-workshop
+spec:
+  template:
+    spec:
+      containers:
+      - image: quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT-native <i class="conum" data-value="1"></i><b>(1)</b>
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change this value for your image</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally apply this resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f service.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>List the KNative services to validate the instantiation of the service and get the URL:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kn service list</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                   URL                                                                                LATEST                       AGE   CONDITIONS   READY   REASON
+quarkus-app-workshop   <a href="https://quarkus-app-workshop-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com" class="bare">https://quarkus-app-workshop-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com</a>   quarkus-app-workshop-00001   59m   3 OK / 3     True</code></pre>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="10-metrics.html">Observability</a></span>
+  <span class="next"><a href="12-bonus-track.html">BONUS - Kafka</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

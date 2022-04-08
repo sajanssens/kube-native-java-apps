@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Observability :: Kube-Native Java Apps</title>
+    <link rel="canonical" href="https://github.com/redhat-scholars/kube-native-java-apps/kube-native-java-apps/10-metrics.html">
+    <link rel="prev" href="09-panache.html">
+    <link rel="next" href="11-serverless.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/NewRHDFullLogo_4-color_white-wordmark.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://github.com/redhat-scholars/kube-native-java-apps">Kube-Native Java Apps</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="kube-native-java-apps" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">Get Started</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="01-setup.html#prerequisite">Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-bootstrap.html">Bootstrap Quarkus App</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#devmode">Quarkus dev mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#continuous-testing">Quarkus Continuous Testing</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#configuration">Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#resteasy-openapi">RestEasy Jackson/OpenAPI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="02-bootstrap.html#springboot-compat">Spring Boot migration</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-kube-intro.html">Introduction to Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#sandbox">Getting your OpenShift Sandbox account</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="03-kube-intro.html#quay">Getting your Quay account</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-containers.html">Creating containers</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#dockerfile">Using Dockerfile</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#jib">Using Jib</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="04-containers.html#buildpacks">Using Buildpacks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="05-kube-deployment.html">Kubernetes Deployment</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#kube-extension">Kubernetes extension</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="05-kube-deployment.html#customize-resources">Customize created resources</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="06-rest-client-fault.html">Rest Client &amp; Fault Tolerance</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#rest-client">Create Rest Client</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="06-rest-client-fault.html#fault-tolerance">Fault tolerance on communication with external API</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="07-kube-advanced.html">Kubernetes Advanced</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="07-kube-advanced.html">Integration tests to avoid Kubernetes YAML issues</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="08-quarkus-cloud-native.html">Quarkus Cloud Native</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#limits">Adjust Resource Limits</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="08-quarkus-cloud-native.html#health">Health check extension</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="09-panache.html">Hibernate Panache</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#panache-apps">Create Panache Applications</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#dev-services">Dev services</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#deploy-db">Deploy Database in the sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="09-panache.html#show-healths">Show Health Checks</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="10-metrics.html">Observability</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#micrometer">Micrometer</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="#jaeger">Jaeger</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="11-serverless.html">Going Serverless</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#knative-intro">Intro to Knative</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#servelessing-service">Serverlessing a service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#native-compile">Compile to native</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="11-serverless.html#deploy-native">Deploy</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="12-bonus-track.html">BONUS - Kafka</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#managed-kafka">Create a Managed Kafka instance</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#deploy-quarkus-sb">Deploy app in Quarkus using Kafka and Service Binding</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="12-bonus-track.html#knative-eventing">Knative Eventing</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Tutorial</a></li>
+    <li><a href="10-metrics.html">Observability</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/kube-native-java-apps/edit/master/documentation/modules/ROOT/pages/10-metrics.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Observability</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>When building distributed systems, you should use metrics to ensure that you see all your requests, including errors or slow requests etc.
+Tracing helps you with following the evolution of a transaction and it usually needs to be sampled at high volumes of traffic
+(because the amount of data increases proportionally to the traffic volume).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As we will need to correlate our metrics and traces, we should make a small setup for Jaeger, OpenTelemetry Collector and Prometheus.
+The OpenTelemetry Collector acts as an proxy for Jaeger and Prometheus.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This setup has development purposes and is due to resource constraints that exist within Red Hat OpenShift Developer Sandbox.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First, open in broswer terminal and type the command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -O "https://raw.githubusercontent.com/redhat-scholars/kube-native-java-apps/master/apps/kubefiles/{jaeger-server-configmap.yaml,prometheus-configmap.yaml,otel-configmap.yaml,jaeger-deployment.yaml,jaeger-service.yaml,otel-collector-deployment.yaml,otel-collector-service.yaml,prometheus-deployment.yaml}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will download the files used to configure Jaeger/Prometheus/OpenTelemetry collector.</p>
+</div>
+<div class="paragraph">
+<p>Next, please run the following commands in the same terminal:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f jaeger-server-configmap.yaml
+kubectl apply -f prometheus-configmap.yaml
+kubectl apply -f otel-configmap.yaml
+kubectl apply -f jaeger-deployment.yaml
+kubectl apply -f jaeger-service.yaml
+kubectl apply -f otel-collector-deployment.yaml
+kubectl apply -f otel-collector-service.yaml
+oc new-app --docker-image=quay.io/prometheus/prometheus:latest
+kubectl replace -f prometheus-deployment.yaml
+oc expose svc prometheus
+oc expose svc jaeger --port=16686 --generator="route/v1"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="micrometer"><a class="anchor" href="#micrometer"></a>Micrometer</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When running applications in production we need to send monitoring information to some services like Prometheus.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus provides JVM and other statistics out-of-box with the Metrics extension, but it&#8217;s very valuable for our application to produce its own metrics. Let&#8217;s see how we can achieve it in this chapter.</p>
+</div>
+<div class="paragraph">
+<p>Just open a new terminal window, and make sure you’re at the root of your project, then run:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn quarkus:add-extension -Dextensions="io.quarkus:quarkus-micrometer-registry-prometheus"</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_of_common_tags"><a class="anchor" href="#_configuration_of_common_tags"></a>Configuration of common tags</h3>
+<div class="paragraph">
+<p>When deploying accross multiple projects/namespaces is always good to have an unified view over some application metrics.
+Let&#8217;s define several common tags for the application, varying in value at deployment time:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import io.smallrye.config.ConfigMapping;
+
+@ConfigMapping(prefix = "global")
+interface GlobalTagsConfig {
+     String PROFILE = "profile";
+     String REGION = "region";
+     String COUNTRY="country";
+
+     String region();
+     String country();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>@ConfigMapping(prefix = "global")</code> annotation maps configurations from <code>application.properties</code> prefixed by <code>global</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">global.region=${REGION:CEE} <i class="conum" data-value="1"></i><b>(1)</b>
+global.country=${COUNTRY:'Romania'}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Environment configuration will be named <code>REGION</code> and having the default value <code>CEE</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Further, we will propagate these configurations by via <code>MeterFilter</code> customization:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.config.MeterFilter;
+import io.quarkus.runtime.configuration.ProfileManager;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+
+@Singleton
+public class CustomConfiguration {
+
+    @Inject
+    GlobalTagsConfig tagsConfig;
+
+    @Produces
+    @Singleton
+    public MeterFilter configureTagsForAll() {
+        return MeterFilter.commonTags(Arrays.asList(
+           Tag.of(GlobalTagsConfig.REGION, tagsConfig.region()),
+           Tag.of(GlobalTagsConfig.COUNTRY, tagsConfig.country()),
+           Tag.of(GlobalTagsConfig.PROFILE, ProfileManager.getActiveProfile())
+        ));
+    }
+
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_metrics_definition_at_endpoint_level"><a class="anchor" href="#_metrics_definition_at_endpoint_level"></a>Metrics definition at endpoint level</h3>
+<div class="paragraph">
+<p>In <code>application.properties</code> please add the following configurations:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.micrometer.binder.http-client.enabled=true<i class="conum" data-value="1"></i><b>(1)</b>
+quarkus.micrometer.binder.http-server.enabled=true<i class="conum" data-value="2"></i><b>(2)</b>
+quarkus.micrometer.binder.system=true<i class="conum" data-value="3"></i><b>(3)</b>
+quarkus.micrometer.export.prometheus.enabled=true<i class="conum" data-value="4"></i><b>(4)</b>
+quarkus.micrometer.export.prometheus.path=/metrics<i class="conum" data-value="5"></i><b>(5)</b>
+quarkus.micrometer.binder.jvm=true<i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Outbound HTTP request metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inboud HTTP request metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Micrometer System metrics support.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Enable export of metrics to Prometheus.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Customize the path where metrics are exposed.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Micrometer JVM metrics support.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Go to the <a href="http://localhost:8080/q/swagger-ui/#/Todo%20Resource/get_api">Swagger UI</a> and make several requests.</p>
+</div>
+<div class="paragraph">
+<p>Now go to <a href="http://localhost:8080/metrics">http://localhost:8080/metrics</a> and search for <code>http_server_requests_seconds summary</code>. You will observe that your requests were automatically measured and they also contain the global tags:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># TYPE http_server_requests_seconds summary
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 12.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/api",} 2.058467696
+http_server_requests_seconds_count{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 2.0
+http_server_requests_seconds_sum{country="'Romania'",method="GET",outcome="SUCCESS",profile="dev",region="CEE ",status="200",uri="/metrics",} 0.075653411</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The metrics listed will be exported to Prometheus and further queried over time.
+You can also define your own custom metrics, but please keep in mind the Out Of the Box ones as well.</p>
+</div>
+<div class="paragraph">
+<p>Next, deploy the modified application to the Red Hat Developer Sandbox using:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn clean package -DskipTests -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true -Dquarkus.kubernetes.deploy=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will recreate the container image and redeploy your application.
+Find the route associated to your application (the one you used in <a href="#Kubernetes Advanced">[Kubernetes Advanced]</a>) using either the UI or the in-browser terminal:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s make a few curl requests:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..16}; do curl -v $ROUTE_URL/api; done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When we made the setup of the project, we also exposed the Prometheus installation via a route.
+You can find that route using the following command and access Prometheus UI via it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route prometheus -o jsonpath='{.spec.host}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In Prometheus UI enter the following PromQL query to see the average over time of requests to the <code>/api</code> endpoint:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">avg_over_time(http_server_requests_seconds_count{uri="/api"}[1h:5m])</code></pre>
+</div>
+</div>
+<div class="imageblock text-center mt-4 center">
+<div class="content">
+<img src="_images/promql_query.png" alt="PromQL query example" width="600" height="600">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="jaeger"><a class="anchor" href="#jaeger"></a>Jaeger</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To configure our application using OpenTelemetry and Jaeger, we should add one more extension to its configuration:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn quarkus:add-extension -Dextensions="quarkus-opentelemetry-exporter-jaeger"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>OpenTelemetry propagates cross-cutting concerns through propagators that will share an underlying Context for storing state and accessing data across the lifespan of a distributed transaction.
+In order to work with propagators, the following dependency should be added to <code>pom.xml</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">    &lt;dependency&gt;
+      &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+      &lt;artifactId&gt;opentelemetry-extension-trace-propagators&lt;/artifactId&gt;
+    &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Furthermore, as we wish trace our data through Jaeger and see its performance within Prometheus, we should add the following configuration in <code>application.properties</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.opentelemetry.tracer.exporter.otlp.endpoint=http://otel-collector:8889<i class="conum" data-value="1"></i><b>(1)</b>
+quarkus.opentelemetry.propagators=tracecontext,baggage,jaeger<i class="conum" data-value="2"></i><b>(2)</b>
+quarkus.opentelemetry.tracer.exporter.jaeger.enabled=true<i class="conum" data-value="3"></i><b>(3)</b>
+quarkus.opentelemetry.tracer.exporter.jaeger.endpoint=http://jaeger:14250/api/traces<i class="conum" data-value="4"></i><b>(4)</b>
+quarkus.opentelemetry.tracer.enabled=true
+quarkus.opentelemetry.tracer.sampler.parent-based=true
+quarkus.opentelemetry.tracer.suppress-non-application-uris=false
+quarkus.log.console.format=%d{HH:mm:ss} %-5p traceId=%X{traceId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{2.}] (%t) %s%e%n</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The OTLP endpoint to connect to.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Comma separated list of OpenTelemetry propagators which must be supported.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Export to Jaeger is enabled.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Jaeger exported endpoint.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We should capture the situations when trying to delete a ToDo item that does not exist throws an exception, so we will modify the <code>TodoResource.java</code> class:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+@Path("/api")
+public class TodoResource {
+
+    private final Map&lt;Long, Todo&gt; todos = new HashMap&lt;&gt;();
+
+    @RestClient
+    ActivityService service;
+
+    @PostConstruct
+    public void init() {
+       for (long i = 0; i &lt; 10; i++) {
+           todos.put(i, service.getActivity() );
+       }
+    }
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @GET
+    public List&lt;Todo&gt; getAll() {
+        return new ArrayList&lt;&gt;(todos.values());
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    public Response create(Todo item) {
+        todos.put(item.id, item);
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response update(Todo todo, @PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    public Response deleteCompleted() {
+        todos.entrySet().removeIf(e -&gt; e.getValue().completed);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = todos.get(id);
+        if (entity == null) {
+            Span.current().setAttribute("alarm", "unexpected")<i class="conum" data-value="1"></i><b>(1)</b>
+                    .setStatus(StatusCode.ERROR, "Something wrong happened!");<i class="conum" data-value="2"></i><b>(2)</b>
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        todos.remove(id);
+        return Response.noContent().build();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Attach an attribute to the current span.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Set a status for the situation when the error occurs.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Next, deploy the modified application to the Red Hat Developer Sandbox using:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn clean package -DskipTests -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true -Dquarkus.kubernetes.deploy=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will recreate the container image and redeploy your application.
+Find the route associated to your application (the one you used in <a href="#Kubernetes Advanced">[Kubernetes Advanced]</a>) using either the UI or the in-browser terminal:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s make a few curl requests:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..16}; do curl  -X 'DELETE' -v $ROUTE_URL/api/100 -H 'accept: */*'; done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To observe the traces associated to your requests go to the Jaeger UI:</p>
+</div>
+<div class="imageblock text-center mt-4 center">
+<div class="content">
+<img src="_images/jaeger-ui.png" alt="PromQL query example" width="600" height="600">
+</div>
+</div>
+<div class="paragraph">
+<p>Inspect one of the traces by clicking on it. To correlate the state of these failed situations with the metrics, you can use the following PromQL query in Prometheus:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">avg_over_time(http_server_requests_seconds_max{method="DELETE", status="404"}[1h:5m])</code></pre>
+</div>
+</div>
+<div class="imageblock text-center mt-4 center">
+<div class="content">
+<img src="_images/promql_query_404.png" alt="PromQL query example" width="600" height="600">
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="09-panache.html">Hibernate Panache</a></span>
+  <span class="next"><a href="11-serverless.html">Going Serverless</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
