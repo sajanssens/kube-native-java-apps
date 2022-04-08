@@ -47,7 +47,6 @@
 * xref:09-panache.adoc#dev-services[Dev services]
 * xref:09-panache.adoc#deploy-db[Deploy Database in the sandbox]
 * xref:09-panache.adoc#show-healths[Show Health Checks]
-* xref:09-panache.adoc#show-db-down[Scale Down DB]
 
 [.tile]
 .xref:10-metrics.adoc[Observability]

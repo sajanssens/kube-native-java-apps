@@ -216,6 +216,7 @@ Suppose you want to change the default exposed port in the generated service fro
 
 Create the `src/main/kubernetes` directory with a file named `kubernetes.yml`.
 
+[.console-input]
 [source, yaml]
 .src/main/kubernetes/kubernetes.yml
 ----

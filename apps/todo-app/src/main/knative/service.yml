@@ -1,0 +1,15 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: quarkus-app-workshop
+spec:
+  template:
+    spec:
+      containers:
+      - image: quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT-native
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready

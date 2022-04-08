@@ -1,15 +1,591 @@
 = Quarkus Serverless with Knative 
 include::_attributes.adoc[]
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+
+https://github.com/knative/client[Knative Client] is the command line utility aimed at enhancing the developer experience when doing Knative Serving and Eventing tasks.
+
+At the end of this chapter you will be able to :
+
+* Install Knative Client 
+* Create, update, list and delete Knative service
+* Create, update, list and delete Knative service revisions
+* List Knative service routes
+
+Install `kn` by using command line section in RedHat Sandbox:
+
+image::devsandbox-kn-cli.png[]
+
+Download it, unzip it and put in an accessible directory.
+
+Verify installation by running the command:
+
+[#kn-verify-install]
+[.console-input]
+[source,bash]
+----
+kn version
+----
+
+The above command will return a response like 
+
+[source,text,subs="macros+,+attributes"]
+[.console-output]
+----
+Version:      {kn-client-version}
+Build Date:   2021-12-14T12:31:50Z
+Git Revision: 530841f1
+Supported APIs:
+* Serving
+  - serving.knative.dev/v1 (knative-serving )
+* Eventing
+  - sources.knative.dev/v1 (knative-eventing )
+  - eventing.knative.dev/v1 (knative-eventing )
+----
 
 [#knative-intro]
 == Intro to Knative
 
+[#kn-create-ksvc]
+=== Create Service
+
+To create the `greeter` service using `kn` run the following command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service create greeter \
+  --image {greeter-image}
+----
+
+A successful create of the `greeter` service should show a response like 
+
+[.console-output]
+[source,bash,subs="+attributes"]
+----
+Creating service 'greeter' in namespace 'knativetutorial':
+
+  0.028s The Configuration is still working to reflect the latest desired specification.
+  0.097s The Route is still working to reflect the latest desired specification.
+  0.120s Configuration "greeter" is waiting for a Revision to become ready.
+ 12.075s ...
+ 12.128s Ingress has not yet been reconciled.
+ 12.223s unsuccessfully observed a new generation
+ 12.378s Ready to serve.
+
+Service 'greeter' created to latest revision 'greeter-zyjrq-1' is available at URL:
+http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com
+----
+
+[#kn-list-services]
+=== List Knative Services
+
+You can list the created services using the command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service list
+----
+
+[.console-output]
+[source,text,subs="+quotes,+attributes"]
+----
+NAME      #URL#                                                   LATEST            AGE   CONDITIONS   READY   REASON
+greeter   http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com  greeter-sxnzq-1   10m   3 OK / 3     True
+----
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+curl http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com
+----
+
+[.console-output]
+[source,bash,subs="+macros,attributes+"]
+----
+Hi  greeter => '9861675f8845' : 1
+----
+
+List the Pods:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="+macros,attributes+"]
+----
+NAME                                          READY   STATUS      RESTARTS   AGE
+greeter-stdvk-1-deployment-5cbd996d7f-mbmjq   2/2     Running     0          49s
+----
+
+The greeter Pod is deployed, now wait for 60 seconds and list the Pods again:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl get pods
+----
+
+No `greeter-stdvk-1-deployment-5cbd996d7f-mbmjq` Pod is shown as it has been automatically scaled to 0.
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+curl http://greeter-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com
+----
+
+[.console-output]
+[source,bash,subs="+macros,attributes+"]
+----
+Hi  greeter => '9861675f8845' : 1
+----
+
+Autoamtically a new instance is scaled up when the request comes to the cluster.
+
+=== Delete Knative Service
+
+You can also use `kn` to delete the service that were created, to delete the service named `greeter` run the following command:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service delete greeter
+----
+
+[source,bash]
+[.console-output]
+----
+Service 'greeter' successfully deleted in namespace ''.
+----
+
+=== Traffic Distribution
+
+To explore the goals of this chapter, we will be using a colors service called `blue-green-canary`, and we'll deploy using YAML files instead of using `kn`.
+
+[.console-input]
+[source, yaml]
+.colors-service-blue.yaml
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: blue-green-canary
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/rhdevelopers/blue-green-canary
+          env:
+            - name: BLUE_GREEN_CANARY_COLOR
+              value: "#6bbded"
+            - name: BLUE_GREEN_CANARY_MESSAGE
+              value: "Hello"
+----
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -f colors-service-blue.yaml
+----
+
+==== Invoke the Service
+
+Get the service URL,
+
+[.console-input]
+[source,bash]
+----
+kn service describe blue-green-canary -o url
+----
+
+Use the URL to open the service in a browser window.If the service was deployed correctly you should see blue background browser page, with greeting as *Hello*.
+
+.Blue Green Canary::Blue
+image::blue-green-canary-blue.png[]
+
+=== Deploy a New Revision of a Service
+
+Let us now change the configuration of the service by updating the service environment variable BLUE_GREEN_CANARY_COLOR to make the browser display green color with greeting text as Namaste.
+
+[.console-input]
+[source, yaml]
+.colors-service-green.yaml
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: blue-green-canary
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/rhdevelopers/blue-green-canary
+          env:
+            - name: BLUE_GREEN_CANARY_COLOR
+              value: "#5bbf45"
+            - name: BLUE_GREEN_CANARY_MESSAGE
+              value: "Namaste"
+----
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -f colors-service-green.yaml
+----
+
+Now invoking the service again using the service URL, will show a green color browser page with greeting Namaste.
+
+.Blue Green Canary::Green
+image::blue-green-canary-green.png[]
+
+==== Revisions
+
+Check to ensure you have two revisions of the blue-green-canary service:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision list
+----
+
+[.console-output]
+[source,bash]
+----
+NAME                        SERVICE             TRAFFIC   TAGS   GENERATION   AGE     CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%             2            2m33s   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary                    1            30m     3 OK / 4     True
+----
+
+=== Tag Revisions
+
+As you had observed that the Knative service `blue-green-canary` now has two revisions namely *blue-green-canary-00001* and *blue-green-canary-00002*. As the Revision names are autogenerated it is hard to comprehend to which code/configuration set it corresponds to. To overcome this problem Knative provides *tagging* of revision names that allows one to tag a revision name to a logical human understanable names called *tags*.
+
+As our colors service shows different colors on the browser let us tag the revisions with color,
+
+List the existing revisions,
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision list -s blue-green-canary
+----
+
+[.console-output]
+[source,bash]
+----
+NAME                        SERVICE             TRAFFIC   TAGS   GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%             2            23m   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary                    1            51m   3 OK / 4     True
+----
+
+When Knative rolls out a new revision, it increments the `GENERATION` by *1* and then routes *100%* of the `TRAFFIC` to it, hence we can use the `GENERATION` or `TRAFFIC` to identify the latest reivsion. 
+
+==== Tag Blue
+
+Let us tag `blue-green-canary-00001` which shows *blue* browser page with tag name `blue`.
+
+[.console-input]
+[source,bash,subs="+macros,attributes+,+quotes"]
+----
+kn service update blue-green-canary --tag=#blue-green-canary-00001#=blue
+----
+
+[.console-output]
+[source,bash]
+----
+Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io
+----
+
+==== Tag Green
+
+Let us tag `blue-green-canary-00002` which shows *green* browser page with tag name `green`.
+
+[.console-input]
+[source,bash,subs="+macros,attributes+,+quotes"]
+----
+kn service update blue-green-canary --tag=#blue-green-canary-00002#=green
+----
+
+[.console-output]
+[source,bash]
+----
+Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io
+----
+
+==== Tag Latest
+
+Lets tag whatever revision that is latest to be tagged as *latest*.
+
+[.console-input]
+[source,bash,subs="+macros,attributes+,+quotes"]
+----
+kn service update blue-green-canary --tag=@latest=latest
+----
+
+[.console-output]
+[source,bash]
+----
+Updating Service 'blue-green-canary' in namespace 'knativetutorial':
+
+  0.037s The Route is still working to reflect the latest desired specification.
+  0.126s Ingress has not yet been reconciled.
+  0.162s Waiting for load balancer to be ready
+  0.303s Ready to serve.
+
+Service 'blue-green-canary' with latest revision 'blue-green-canary-00002' (unchanged) is available at URL:
+http://blue-green-canary.knativetutorial.192.168.64.13.nip.io
+----
+
+Let us query the Service Revisions again,
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision list -s blue-green-canary
+----
+
+[.console-output]
+[source,bash,subs="+quotes"]
+----
+NAME                        SERVICE             TRAFFIC   TAGS    GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary   100%      #latest,green#   2            29m   3 OK / 4     True
+blue-green-canary-00001   blue-green-canary             #blue#    1            57m   3 OK / 4     True
+----
+
+As *green* happend to be latest revision it has been tagged with name `lastest` in addition to `green`.
+
+Let us use the tag names for easier identification of the revision and perform traffic distribution amongst them.
+
+=== Applying Blue-Green Deployment Pattern
+
+Knative offers a simple way of switching 100% of the traffic from one Knative service revision (blue) to another newly rolled out revision (green). If the new revision (e.g. green) has erroneous behavior then it is easy to rollback the change.
+
+In this exercise you will applying the Blue/Green deployment pattern with the Knative Service called greeter. You have already deployed two <<deploying-revisions,revisions>> of blue-green-canary identified using the tags  `blue` and `green`.
+
+With the deployment of *green* revison you noticed that Knative automatically started to routing 100% of the traffic to `blue-green-canary-00002`. 
+
+Now let us assume, due to a critical bug  we need to roll back `green` to `blue`.
+
+The following Knative Service YAML is identical to the previously deployed `green` except that we have added the _traffic_ section to indicate that 100% of the traffic should be routed to `blue`.
+
+Before you rollback the revision, refresh the browser window where you have opened the blue-green-canary service, to make sure it is still showing *green* browser page with greeting *Namaste*.
+
+Now apply the update Knative service configuration using the command as shown in following listing:
+
+==== Rollback to blue
+
+Route all the traffic of service `blue-green-canary` to blue revision of the service:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kn service update blue-green-canary --traffic blue=100,green=0,latest=0
+----
+
+NOTE: We use the tag names to identify the revisions
+
+Let us list all revisions with tags:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kn revision list
+----
+
+Based on the revision tags that we created earlier, the output should be like:
+
+[.console-output]
+[source,text,subs="quotes"]
+----
+NAME                        SERVICE             TRAFFIC   TAGS           GENERATION   AGE   CONDITIONS   READY   REASON
+blue-green-canary-00002   blue-green-canary             latest,green   2            56m   4 OK / 4     True
+blue-green-canary-00001   blue-green-canary   #100%#      #blue#           1            83m   4 OK / 4     True
+----
+
+Let us list the available sub-routes:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl get ksvc blue-green-canary -oyaml \
+ | yq r - 'status.traffic[*].url'
+----
+
+The above command should return you three sub-routes for the main `greeter` route:
+
+[source,bash,subs="+macros,attributes"]
+----
+http://latest-blue-green-canary.knativetutorial.192.168.64.13.nip.io #<.>
+http://blue-blue-green-canary.knativetutorial.192.168.64.13.nip.io #<.>
+http://green-blue-green-canary.knativetutorial.192.168.64.13.nip.io  #<.>
+----
+<1> the sub route for the traffic tag `latest`
+<2> the sub route for the traffic tag `blue`
+<3> the sub route for the traffic tag `green`
+
+You will notice that the command does not create any new configuration/revision/deployment as there was no application update (e.g. image tag, env var, etc), but when you call the service, Knative scales up the `blue` that shows *blue* browser page with greeting *Hello*.
+
+.Blue Green Canary::Blue
+image::blue-green-canary-blue.png[]
+
+[.console-input]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+NAME                                     READY   STATUS        RESTARTS   AGE
+blue-green-canary-00001-deployment-54597d94b9-25x4r#   2/2     Running       0          12s
+blue-green-canary-00002-deployment-6cb545df65-ktqc2   0/2     Terminating   0          2m
+----
+
+Since `blue` is the active revision now, the existing `green` pod is getting terminated as no future requests will be served by it.
+
+[TIP]
+====
+As an exercise, flip all the traffic back to `green` using `kn` command.
+====
+
+==== Applying Canary Release Pattern
+
+A Canary release is more effective when you want to reduce the risk of introducing new feature. It allows you a more effective feature-feedback loop before rolling out the change to your entire user base.
+
+Knative allows you to split the traffic between revisions in increments as small as 1%.
+
+To see this in action, apply the following Knative service definition that will split the traffic 80% to 20% between `blue` and `green`.
+
+To roll out the greeter canary deployment use the following command:
+
+.Create greeter canary Deployment
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kn service update blue-green-canary \
+  --traffic="blue=80" \
+  --traffic="green=20" 
+----
+
+As in the previous section on <<blue-green>> deployments, the command will not create any new configuration/revision/deployment. To observe the traffic distribution, open the Service Route URL in your browser window. 
+
+You will notice the browser alternating betwee green and blue color, with majority of the time staying with blue.
+
+image::blue-green-canary.gif[]
+
+You should also notice that two pods are running representing both `blue` and `green`:
+
+[.console-input]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+NAME                                                    READY   STATUS    RESTARTS   AGE
+blue-green-canary-00001-deployment-54597d94b9-q8c57   2/2     Running   0          79s
+blue-green-canary-00002-deployment-8564bf5b5b-gtvh4   2/2     Running   0          14s
+----
+
+==== Cleanup
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+kn service delete blue-green-canary
+----
+
 [#servelessing-service]
-== Serverlessing What’s Time service
+== Serverlessing Todo Service
+
+One of the key aspects of services running under serverless architecture, is the startup time. 
+This application might take around 6 seconds to start in the RedHat Sandbox machines. 
+
+This is fine for long-running services, but in serverless where the cluster might start and stop the service pretty often, the startup time becomes important.
+
+Quarkus integrates with GraalVM to compile the Java application into native binary file speeding up the start up times and the usage memory.
 
 [#native-compile]
 == Compile to native 
 
+Start your local Docker/Podman/CRI-O instance, and run the following command in the terminal to compile to native, create a container image and push it:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+./mvnw clean package -DskipTests -Pnative -Dquarkus.native.container-build=true -Dquarkus.container-image.push=true -Dquarkus.container-image.tag=1.0.0-SNAPSHOT-native
+----
+
+We override the tag value to `1.0.0-SNAPSHOT-native` to have both JVM and native containers correctly tagged.
+
 [#deploy-native]
 == Deploy
 
+To deploy the application as a KNative service, create a new file with name `service.yaml` with the following content:
+
+[.console-input]
+[source, yaml]
+.service.yaml
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: quarkus-app-workshop
+spec:
+  template:
+    spec:
+      containers:
+      - image: quay.io/rhdevelopers/quarkus-app-workshop:1.0.0-SNAPSHOT-native # <1>
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+----
+<1> Change this value for your image
+
+Finally apply this resource:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kubectl apply -f service.yaml
+----
+
+List the KNative services to validate the instantiation of the service and get the URL:
+
+[.console-input]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service list
+----
+
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+NAME                   URL                                                                                LATEST                       AGE   CONDITIONS   READY   REASON
+quarkus-app-workshop   https://quarkus-app-workshop-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com   quarkus-app-workshop-00001   59m   3 OK / 3     True
+----
