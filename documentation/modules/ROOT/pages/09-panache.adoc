@@ -306,6 +306,16 @@ image::devsandbox-deployed.png[]
 [#show-healths]
 == Show Health Checks
 
-[#show-db-down]
-== Show that if DB is down Pod is not ready anymore
+Health check extension registers a special readiness health check for databases when using Panache extension.
 
+Let's see how the application is become in not ready state when the database is stopped.
+Open Topology view, select the PostgreSQL deployment, and go to *Details* tab.
+There scale down the Pod to 0 instances by clicking the arrow as shown in the following figure:
+
+image::devsandbox-psql-scale-down.png[]
+
+Then wait some seconds and you'll see that the aplication becomes not ready as the readiness check fails.
+
+image::devsandbox-app-not-ready.png[]
+
+Scaling up the PostgreSQL instance will make the application be ready again.
