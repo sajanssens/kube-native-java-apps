@@ -3,7 +3,7 @@ runtime:
 
 site:
   title: Best Practices for Kube-Native Java Apps
-  url: http://localhost:3000/rhs-build-course/index.html
+  url: https://redhat-developer-demos.github.io/kube-native-java-apps
   start_page: kube-native-java-apps::index.adoc
 
 content:
