@@ -170,13 +170,10 @@ Open `src/main/resources/application.properties`, and add the following Hibernat
 [.console-input]
 [source, properties]
 ----
-%dev.quarkus.hibernate-orm.database.generation=update
-quarkus.hibernate-orm.database.generation=drop-and-create
+quarkus.hibernate-orm.database.generation=update
 ----
 
-Both properties are the same key, but the values are used depending on starting mode.At dev mode (`%dev`) the value used for the property is `update` while the other is used in the other cases.
-
-Also add a property to show SQL statements executed by the application.
+Also add a property to show SQL statements executed by the application but only when using dev-mode.
 
 [.console-input]
 [source, properties]
@@ -262,7 +259,7 @@ Now open again the `src/main/resources/application.properties` configuration fil
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=admin
 quarkus.datasource.password=admin
-quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo
 ----
 
 Also, let's automate the creation of an OpenShift Route.
