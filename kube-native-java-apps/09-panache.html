@@ -276,12 +276,14 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 public class Todo extends PanacheEntity { <i class="conum" data-value="2"></i><b>(2)</b>
 
     @NotBlank <i class="conum" data-value="3"></i><b>(3)</b>
-    @Column(unique = true)
+    @JsonSetter("activity")
     public String title;
     public boolean completed;
 
     @Column(name = "ordering")
     public int order;
+
+    @JsonSetter("link")
     public String url;
 
     public static List&lt;Todo&gt; findNotCompleted() { <i class="conum" data-value="4"></i><b>(4)</b>
@@ -338,10 +340,14 @@ Hibernate ORM with Panache focuses on making your entities trivial and fun to wr
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
-import java.util.List;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.List;
+
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -357,6 +363,19 @@ import io.quarkus.panache.common.Sort;
 
 @Path("/api")
 public class TodoResource {
+
+@RestClient
+    ActivityService service;
+
+      @GET
+    @Path("load")
+    @Transactional
+    public Response load() {
+        for (long i = 0; i &lt; 10; i++) {
+            service.getActivity().persist();
+        }
+        return Response.status(Status.CREATED).build();
+    }
 
     @OPTIONS
     public Response opt() {
@@ -450,6 +469,14 @@ Open <code>src/main/resources/application.properties</code>, and add the followi
 <div class="listingblock console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">%dev.quarkus.hibernate-orm.log.sql=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, invoke the <code>/api/load</code> endpoint to enter some data in the database:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:8080/api/load</code></pre>
 </div>
 </div>
 </div>
@@ -554,37 +581,26 @@ Inspect the logs to see the SQL statements.</p>
 <div class="listingblock console-input">
 <div class="title">src/main/resources/application.properties</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=admin
-quarkus.datasource.password=admin
-%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo</code></pre>
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.kubernetes.env.secrets=postgresql
+
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=${database-user:admin}
+quarkus.datasource.password=${database-password:admin}
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/${database-name}</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Also, let&#8217;s automate the creation of an OpenShift Route.
-Copy the following content at the bottom of <code>src/main/kubernetes/kubernetes.yml</code> file:</p>
-</div>
-<div class="listingblock console-input">
-<div class="title">src/main/kubernetes/kubernetes.yml</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    app.quarkus.io/commit-id: 72db1f18a9d063476e333b963655b4192a45e030
-    app.quarkus.io/build-timestamp: 2022-04-05 - 21:26:33 +0000
-  labels:
-    app.kubernetes.io/version: 1.0.0-SNAPSHOT
-    app.kubernetes.io/name: quarkus-app-workshop
-  name: quarkus-app-workshop
-spec:
-  port:
-    targetPort: 8080
-  to:
-    kind: Service
-    name: quarkus-app-workshop</code></pre>
-</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Please note that the values for user, password and database name are filled in from a Kubernetes Secret.
+This secret is generated when you instantiate your PostgreSQL database via the Red Hat OpenShift template.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The last step is deploying the application to sandbox by running:</p>

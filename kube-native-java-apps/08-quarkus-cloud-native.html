@@ -308,7 +308,7 @@ Container   memory    -    -    64Mi             750Mi          -</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc todo-app-jvm</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc expose svc quarkus-app-workshop</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -316,7 +316,7 @@ Container   memory    -    -    64Mi             750Mi          -</code></pre>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export ROUTE_URL=http://$(kubectl get route quarkus-app-workshop -o jsonpath='{.spec.host}')
 hey -n 1000 -c 200 $ROUTE_URL/api</code></pre>
 </div>
 </div>
