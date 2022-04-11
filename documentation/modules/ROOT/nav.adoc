@@ -64,4 +64,3 @@
 .xref:12-bonus-track.adoc[BONUS - Kafka]
 * xref:12-bonus-track.adoc#managed-kafka[Create a Managed Kafka instance]
 * xref:12-bonus-track.adoc#deploy-quarkus-sb[Deploy app in Quarkus using Kafka and Service Binding]
-* xref:12-bonus-track.adoc#knative-eventing[Knative Eventing]

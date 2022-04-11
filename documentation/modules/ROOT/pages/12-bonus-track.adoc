@@ -4,8 +4,155 @@ include::_attributes.adoc[]
 [#managed-kafka]
 == Create a Managed Kafka instance
 
-[#deploy-quarkus-sb]
-== Deploy app in Quarkus using Kafka and Service Binding
+With your Red Hat Developer account you also have access to http://console.redhat.com/[Red Hat Hybrid Console].
+From there you can access the https://console.redhat.com/application-services/overview[Application Services] and you can create your kafka instance : 
 
-[#knative-eventing]
-== Knative Eventing 
+image::create-kafka.png[Managed Kakfa]
+
+image::create-kafka-1.png[Create Instance]
+
+image::create-kafka-2.png[Create Instance]
+
+Now, we can create a topic named `todo-count` : 
+
+image::kafka-topic.png[Create Instance]
+
+image::kafka-topic-2.png[Create Instance]
+
+
+
+
+
+[#deploy-quarkus-sb]
+== Update the Todo app with Kafka and Service Binding
+
+We need to add 2 new extensions : 
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-smallrye-reactive-messaging-kafka, io.quarkus:quarkus-kubernetes-service-binding"
+----
+
+Update the `TodoResource` like this : 
+
+[.console-input]
+[source, java]
+----
+package org.acme;
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
+import io.quarkus.panache.common.Sort;
+
+@Path("/api")
+public class TodoResource {
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @Channel("todo-count")
+    Emitter<String> todoEmitter;
+
+    @GET
+    public List<Todo> getAll() {
+        todoEmitter.send(String.valueOf(Todo.count()));
+        return Todo.listAll(Sort.by("order"));
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    @Transactional
+    public Response create(@Valid Todo item) {
+        item.persist();
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    @Transactional
+    public Response update(@Valid Todo todo, @PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    @Transactional
+    public Response deleteCompleted() {
+        Todo.deleteCompleted();
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Transactional
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        entity.delete();
+        return Response.noContent().build();
+    }
+
+}
+----
+
+Rebuild your app, create an image, push it and redeploy it Kubernetes.
+
+== Enable Managed Service on your Sandbox
+
+image::sandbox-managed.png[Create Instance]
+
+Now, go back to your hybrid console, select your topic and go to `access` : 
+
+image::topic-access.png[Create Instance]
+
+And assign those permissions : 
+
+image::assign-permissions.png[Create Instance]
+
+Connect your Todo app to the Managed Service Kakfa Component by dragging a line from the todo app to the `aks` component : 
+
+image::aks.png[Create Instance]
+
+Now deploy this container image : `quay.io/rhdevelopers/todo-count-stream:1.0.0-SNAPSHOT`
+
+Access the route of this new app and add `/todo-count` to the URL , it will open a page getting stream events. 
+To generate an event, just make sure to call the Todo api : `/api` or refresh the todo.html page.
+
+
+
+
