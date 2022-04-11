@@ -534,18 +534,18 @@ quarkus.kubernetes.ingress.expose=true<i class="conum" data-value="3"></i><b>(3)
 kind: Ingress
 metadata:
   annotations:
-    app.quarkus.io/build-timestamp: 2022-04-07 - 12:22:57 +0000
+    app.quarkus.io/build-timestamp: 2022-04-11 - 18:28:06 +0000
   labels:
-    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/name: quarkus-app-workshop
     app.kubernetes.io/version: 1.0.0-SNAPSHOT
-  name: todo-app
+  name: quarkus-app-workshop
 spec:
   rules:
     - http:
         paths:
           - backend:
               service:
-                name: todo-app
+                name: quarkus-app-workshop
                 port:
                   name: http
             path: /
