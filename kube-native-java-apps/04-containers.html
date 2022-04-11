@@ -234,22 +234,537 @@
   <div class="content">
 <article class="doc">
 <h1 class="page">Creating containers</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we have our running workload it&#8217;s that we containerize it !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cli_tools"><a class="anchor" href="#_cli_tools"></a>CLI Tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following CLI tools are required for running the exercises in this section.</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>Please have them installed and configured before you get started with any of the tutorial chapters.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><strong>Tool</strong></th>
+<th class="tableblock halign-left valign-top"><strong>macOS</strong></th>
+<th class="tableblock halign-left valign-top"><strong>Fedora</strong></th>
+<th class="tableblock halign-left valign-top"><strong>Windows</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Docker</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">Docker Desktop for Mac</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dnf install docker</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">Docker Desktop for Windows</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quay_account"><a class="anchor" href="#_quay_account"></a>Quay account</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By creating your Red Hat Developer account you also have access to <a href="http://quay.io" target="_blank" rel="noopener">Quay</a></p>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="dockerfile"><a class="anchor" href="#dockerfile"></a>Using dockerfiles</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>A Dockerfile is where you&#8217;ll estabilish the definitions used to build a container image. It uses three main keywords/commands:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>FROM: where you&#8217;ll inform the base image used to build your own image</p>
+</li>
+<li>
+<p>ADD: where you&#8217;ll add resources (files) to your image</p>
+</li>
+<li>
+<p>CMD: where you&#8217;ll inform how to start the application</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Sometimes people ask when to use ADD and when to use COPY. Both of them can be used to copy files from the source to destination, but:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ADD: The source can only be the host</p>
+</li>
+<li>
+<p>COPY: The source can be the host or a remote URL</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To let this application ready to be distributed, let&#8217;s package it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn package</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_a_dockerfile"><a class="anchor" href="#_building_a_dockerfile"></a>Building a Dockerfile</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create a file named Dockerfile.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">FROM registry.access.redhat.com/ubi8/openjdk-11
 
+ADD target/quarkus-app/lib/ /deployments/lib/
+ADD target/quarkus-app/quarkus-run.jar /deployments/app.jar
+ADD target/quarkus-app/app/ /deployments/app/
+ADD target/quarkus-app/quarkus/ /deployments/quarkus/
+
+CMD ["java", "-jar", "/deployments/app.jar"]</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_containers"><a class="anchor" href="#_running_containers"></a>Running containers</h3>
+<div class="paragraph">
+<p>As we removed the image on the previous step, we need to build it again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker build -t my-image .</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we are ready to create a container based on this image. Just run:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker create --name my-container my-image</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You container is created.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_listing_containers"><a class="anchor" href="#_listing_containers"></a>Listing containers</h3>
+<div class="paragraph">
+<p>To see your just created container:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker ps</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Your output is probably something like this:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Why your container isn&#8217;t in the list if you&#8217;ve just created it?</p>
+</div>
+<div class="paragraph">
+<p>Because it isn&#8217;t running, and using plain <code>docker ps</code> will only list the running containers. Now try this:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker ps -a</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now your output should be something like this:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+ccaadddf1c48        my-image            "java -jar /deployme…"   3 minutes ago       Created                                 my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s listing all containers, not matter the status. Your container is listed as <code>Created</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_starting_containers"><a class="anchor" href="#_starting_containers"></a>Starting containers</h3>
+<div class="paragraph">
+<p>To run the container you&#8217;ve just created execute this:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker start my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To check if it&#8217;s running, try the plain <code>docker ps</code> again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker ps</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now your output will be like this:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                          NAMES
+ccaadddf1c48        my-image            "java -jar /deployme…"   8 minutes ago       Up 54 seconds       8080/tcp, 8443/tcp, 8778/tcp   my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that the status now is <code>Up 54 seconds</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stopping_containers"><a class="anchor" href="#_stopping_containers"></a>Stopping containers</h3>
+<div class="paragraph">
+<p>To stop your container:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker stop my-container</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_containers"><a class="anchor" href="#_removing_containers"></a>Removing containers</h3>
+<div class="paragraph">
+<p>To remove your container:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker rm my-container</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_and_starting_a_container_at_once"><a class="anchor" href="#_creating_and_starting_a_container_at_once"></a>Creating and starting a container at once</h3>
+<div class="paragraph">
+<p>Instead of creating a container and then starting, you can do it at once:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker run --name my-container my-image</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that you terminal is attached to the container process. If you use <code>CTRL+C</code>, the container will stop.</p>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s create a detached container. First we remove this one:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker rm my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And now we create it detached:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker run -d --name my-container my-image</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_checking_the_log_of_a_container"><a class="anchor" href="#_checking_the_log_of_a_container"></a>Checking the log of a container</h3>
+<div class="paragraph">
+<p>To see what this container is logging, use this:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker logs my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to keep following the output:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker logs -f my-container</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use <code>CTRL+C</code> to stop following the log.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_port"><a class="anchor" href="#_port"></a>Port</h3>
+<div class="paragraph">
+<p>The application running inside your container can be accessed through the port 8080, so let&#8217;s try it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:8080/hello</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should have gotten this output:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">curl: (7) Failed to connect to localhost port 8080: Connection refused</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is happening because we need to explicit expose the ports you need, and we didn&#8217;t do it so far. So let&#8217;s fix it.</p>
+</div>
+<div class="paragraph">
+<p>First let&#8217;s remove the container:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker rm -f my-container</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Did you see something different?</p>
+</div>
+<div class="paragraph">
+<p>We used the <code>-f</code> flag to force the removal of the container even if its running. Be careful when using it!</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now we re-create the container, but exposing the port 8080:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker run -d --name my-container -p 8080:8080 my-image</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s try to reach the application again:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:8080/hello</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You now got this output:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">hello</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Meaning that your application is now accessible.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pushing_an_image_to_a_public_registry"><a class="anchor" href="#_pushing_an_image_to_a_public_registry"></a>Pushing an image to a public registry</h3>
+<div class="paragraph">
+<p>So far you&#8217;ve been working with your container image locally. Now let&#8217;s take it to a remote registry.</p>
+</div>
+<div class="paragraph">
+<p>First you&#8217;ll need to tag your image accordingly to your Quay account:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker tag my-image quay.io/rhdevelopers/quarkus-app-workshop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>rhdevelopers</code> with your Red Hat Developer username.</p>
+</div>
+<div class="paragraph">
+<p>Also, if you build your image already using the tag, you won&#8217;t need to do this step before pushing it. In our case it would be like this:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker build -t quay.io/rhdevelopers/quarkus-app-workshop .</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+From this point, replace <code>myrepository</code> with the name of your own repository.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you now run <code>docker images</code> you&#8217;ll see something like this:</p>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">REPOSITORY                                   TAG                 IMAGE ID            CREATED             SIZE
+my-image                                     latest              a63dec174904        55 minutes ago      516MB
+quay.io/rhdevelopers/quarkus-app-workshop    latest              a63dec174904        55 minutes ago      516MB</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s now ready to be pushed. Before doing it, you just need to login into your Docker Hub account within your terminal:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker login quay.io</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And finally you can push it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker push quay.io/rhdevelopers/quarkus-app-workshop</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+By default, in Quay your image won&#8217;t be public. You need to go on the Web Interface, select your image and then go to <code>settings</code> and make it public.
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/quay-public.png" alt="Quay Public Repo">
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="jib"><a class="anchor" href="#jib"></a>Using Jib</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p><a href="https://github.com/GoogleContainerTools/jib">Jib</a> builds optimized Docker and OCI images for your Java applications without a Docker daemon - and without deep mastery of Docker best practices.</p>
+</div>
+<div class="paragraph">
+<p>Quarkus comes with an extension for Jib :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-container-image-jib"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then add those properties (but replace with your Quay username):</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.container-image.group=rhdevelopers
+quarkus.container-image.registry=quay.io
+quarkus.container-image.name=quarkus-app-workshop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can now and push your image in one command :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw clean package -Dquarkus.container-image.push=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Alternatively you can also add this to the properties and each time your build your app the image will also be build and pushed :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.container-image.push=true</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="buildpacks"><a class="anchor" href="#buildpacks"></a>Using Buildpacks</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>The extension <code>quarkus-container-image-buildpack</code> is using buildpacks in order to perform container image builds. Under the hood buildpacks will use a Docker daemon for the actual build. While buildpacks support alternatives to Docker, this extension will only work with Docker.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw quarkus:add-extension -Dextensions="container-image-buildpack"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You need to specify a builder image :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.buildpack.jvm-builder-image=codejive/buildpacks-quarkus-builder</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And again now you can build and push your image :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw clean package -Dquarkus.container-image.push=true</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+When using the buildpack container image extension it is strongly advised to avoid adding <code>quarkus.container-image.build=true</code> in your properties configuration as it might trigger nesting builds within builds. It’s preferable to pass it as an option to the build command instead.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <nav class="pagination">
