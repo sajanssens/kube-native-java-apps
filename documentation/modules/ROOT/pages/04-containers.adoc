@@ -1,14 +1,421 @@
 = Creating containers
 include::_attributes.adoc[]
 
+Now that we have our running workload it's that we containerize it ! 
+
+== CLI Tools
+
+The following CLI tools are required for running the exercises in this section.
+
+--
+Please have them installed and configured before you get started with any of the tutorial chapters.
+
+[options="header"]
+|===
+|**Tool**|**macOS**|**Fedora**|**Windows**
+
+| **Docker**
+| https://www.docker.com/products/docker-desktop[Docker Desktop for Mac, window="_blank"]
+| `dnf install docker`
+| https://www.docker.com/products/docker-desktop[Docker Desktop for Windows, window="_blank"]
+|===
+
+--
+
+== Quay account
+
+By creating your Red Hat Developer account you also have access to http://quay.io[Quay, window="_blank"]
+
 [#dockerfile]
 == Using dockerfiles
 
+A Dockerfile is where you'll estabilish the definitions used to build a container image. It uses three main keywords/commands:
+
+* FROM: where you'll inform the base image used to build your own image
+* ADD: where you'll add resources (files) to your image
+* CMD: where you'll inform how to start the application
+
+[TIP]
+====
+Sometimes people ask when to use ADD and when to use COPY. Both of them can be used to copy files from the source to destination, but:
+
+* ADD: The source can only be the host
+* COPY: The source can be the host or a remote URL 
+====
+
+To let this application ready to be distributed, let's package it:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+mvn package
+----
+
+
+== Building a Dockerfile
+
+Create a file named Dockerfile.
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+
+FROM registry.access.redhat.com/ubi8/openjdk-11
+
+ADD target/quarkus-app/lib/ /deployments/lib/
+ADD target/quarkus-app/quarkus-run.jar /deployments/app.jar
+ADD target/quarkus-app/app/ /deployments/app/
+ADD target/quarkus-app/quarkus/ /deployments/quarkus/
+
+CMD ["java", "-jar", "/deployments/app.jar"]
+----
+
+=== Running containers
+
+As we removed the image on the previous step, we need to build it again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker build -t my-image .
+----
+
+Now we are ready to create a container based on this image. Just run:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker create --name my-container my-image
+----
+
+You container is created. 
+
+=== Listing containers
+
+To see your just created container:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker ps
+----
+
+Your output is probably something like this:
+
+[.console-output]
+[source,text]
+----
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+----
+
+Why your container isn't in the list if you've just created it?
+
+Because it isn't running, and using plain `docker ps` will only list the running containers. Now try this:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker ps -a
+----
+
+Now your output should be something like this:
+
+[.console-output]
+[source,text]
+----
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+ccaadddf1c48        my-image            "java -jar /deployme…"   3 minutes ago       Created                                 my-container
+----
+
+It's listing all containers, not matter the status. Your container is listed as `Created`.
+
+
+=== Starting containers
+
+To run the container you've just created execute this:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker start my-container
+----
+
+To check if it's running, try the plain `docker ps` again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker ps
+----
+
+Now your output will be like this:
+
+
+[.console-output]
+[source,text]
+----
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                          NAMES
+ccaadddf1c48        my-image            "java -jar /deployme…"   8 minutes ago       Up 54 seconds       8080/tcp, 8443/tcp, 8778/tcp   my-container
+----
+
+Notice that the status now is `Up 54 seconds`.
+
+=== Stopping containers
+
+To stop your container:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker stop my-container
+----
+
+=== Removing containers
+
+To remove your container:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker rm my-container
+----
+
+=== Creating and starting a container at once
+
+Instead of creating a container and then starting, you can do it at once:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker run --name my-container my-image
+----
+
+
+Notice that you terminal is attached to the container process. If you use `CTRL+C`, the container will stop.
+
+So let's create a detached container. First we remove this one:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker rm my-container
+----
+
+And now we create it detached:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker run -d --name my-container my-image
+----
+
+=== Checking the log of a container
+
+To see what this container is logging, use this:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker logs my-container
+----
+
+If you want to keep following the output:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker logs -f my-container
+----
+
+Use `CTRL+C` to stop following the log.
+
+=== Port
+
+The application running inside your container can be accessed through the port 8080, so let's try it:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+curl localhost:8080/hello
+----
+
+You should have gotten this output:
+
+[.console-output]
+[source,text]
+----
+curl: (7) Failed to connect to localhost port 8080: Connection refused
+----
+
+This is happening because we need to explicit expose the ports you need, and we didn't do it so far. So let's fix it.
+
+First let's remove the container:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker rm -f my-container
+----
+
+[TIP]
+====
+Did you see something different?
+
+We used the `-f` flag to force the removal of the container even if its running. Be careful when using it! 
+====
+
+Now we re-create the container, but exposing the port 8080:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker run -d --name my-container -p 8080:8080 my-image
+----
+
+Let's try to reach the application again:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+curl localhost:8080/hello
+----
+
+You now got this output:
+
+[.console-output]
+[source,text]
+----
+hello
+----
+
+Meaning that your application is now accessible.
+
+=== Pushing an image to a public registry
+
+So far you've been working with your container image locally. Now let's take it to a remote registry.
+
+
+First you'll need to tag your image accordingly to your Quay account:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker tag my-image quay.io/rhdevelopers/quarkus-app-workshop
+----
+
+Replace `rhdevelopers` with your Red Hat Developer username.
+
+
+Also, if you build your image already using the tag, you won't need to do this step before pushing it. In our case it would be like this:
+
+[.console-input]
+[source,bash,subs="+macros,+attributes"]
+----
+docker build -t quay.io/rhdevelopers/quarkus-app-workshop .
+----
+
+
+
+IMPORTANT: From this point, replace `myrepository` with the name of your own repository.
+
+If you now run `docker images` you'll see something like this:
+
+[.console-output]
+[source,text]
+----
+REPOSITORY                                   TAG                 IMAGE ID            CREATED             SIZE
+my-image                                     latest              a63dec174904        55 minutes ago      516MB
+quay.io/rhdevelopers/quarkus-app-workshop    latest              a63dec174904        55 minutes ago      516MB
+----
+
+It's now ready to be pushed. Before doing it, you just need to login into your Docker Hub account within your terminal:
+
+[.console-input]  
+[source,bash,subs="+macros,+attributes"]
+----
+docker login quay.io
+----
+
+And finally you can push it:
+
+[.console-input]  
+[source,bash,subs="+macros,+attributes"]
+----
+docker push quay.io/rhdevelopers/quarkus-app-workshop
+----
+
+IMPORTANT: By default, in Quay your image won't be public. You need to go on the Web Interface, select your image and then go to `settings` and make it public.
+
+image::quay-public.png[Quay Public Repo]
 
 [#jib]
 == Using Jib
 
+https://github.com/GoogleContainerTools/jib[Jib] builds optimized Docker and OCI images for your Java applications without a Docker daemon - and without deep mastery of Docker best practices.
+
+Quarkus comes with an extension for Jib : 
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-container-image-jib"
+----
+
+Then add those properties (but replace with your Quay username): 
+
+[.console-input]
+[source, properties]
+----
+
+quarkus.container-image.group=rhdevelopers
+quarkus.container-image.registry=quay.io
+quarkus.container-image.name=quarkus-app-workshop
+----
+
+You can now and push your image in one command : 
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw clean package -Dquarkus.container-image.push=true
+----
+
+Alternatively you can also add this to the properties and each time your build your app the image will also be build and pushed : 
+
+[.console-input]
+[source, properties]
+----
+
+quarkus.container-image.push=true
+----
+
+
 [#buildpacks]
 == Using Buildpacks
 
+The extension `quarkus-container-image-buildpack` is using buildpacks in order to perform container image builds. Under the hood buildpacks will use a Docker daemon for the actual build. While buildpacks support alternatives to Docker, this extension will only work with Docker.
 
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw quarkus:add-extension -Dextensions="container-image-buildpack"
+----
+
+You need to specify a builder image : 
+
+[.console-input]
+[source, properties]
+----
+
+quarkus.buildpack.jvm-builder-image=codejive/buildpacks-quarkus-builder
+----
+
+And again now you can build and push your image : 
+
+[.console-input]
+[source,config,subs="+macros,+attributes"]
+----
+./mvnw clean package -Dquarkus.container-image.push=true
+----
+
+IMPORTANT: When using the buildpack container image extension it is strongly advised to avoid adding `quarkus.container-image.build=true` in your properties configuration as it might trigger nesting builds within builds. It’s preferable to pass it as an option to the build command instead.
