@@ -1,5 +1,8 @@
 package org.acme;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -8,20 +11,22 @@ import javax.validation.constraints.NotBlank;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
-@Entity
-public class Todo extends PanacheEntity {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Entity 
+public class Todo extends PanacheEntity { 
 
-    @NotBlank
-    @Column(unique = true)
+    @NotBlank 
+    @JsonSetter("activity")
     public String title;
     public boolean completed;
 
     @Column(name = "ordering")
     public int order;
+
+    @JsonSetter("link")
     public String url;
 
-
-    public static List<Todo> findNotCompleted() {
+    public static List<Todo> findNotCompleted() { 
         return list("completed", false);
     }
 

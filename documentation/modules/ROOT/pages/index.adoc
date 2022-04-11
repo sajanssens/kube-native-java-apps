@@ -15,7 +15,7 @@ Join us on this full-day workshop to learn the best way to manage Java applicati
 
 [.tile]
 .xref:01-setup.adoc[Get Started]
-* xref:01-setup.adoc#minikube[Minikube]
+* xref:01-setup.adoc#prerequisite[Prerequisite]
 
 [.tile]
 .xref:02-bootstrap.adoc[Bootstrap Quarkus App]
