@@ -208,9 +208,6 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="#deploy-quarkus-sb">Deploy app in Quarkus using Kafka and Service Binding</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="#knative-eventing">Knative Eventing</a>
-  </li>
 </ul>
   </li>
 </ul>
@@ -236,19 +233,191 @@
 <div class="sect1">
 <h2 id="managed-kafka"><a class="anchor" href="#managed-kafka"></a>Create a Managed Kafka instance</h2>
 <div class="sectionbody">
-
+<div class="paragraph">
+<p>With your Red Hat Developer account you also have access to <a href="http://console.redhat.com/">Red Hat Hybrid Console</a>.
+From there you can access the <a href="https://console.redhat.com/application-services/overview">Application Services</a> and you can create your kafka instance :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-kafka.png" alt="Managed Kakfa">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-kafka-1.png" alt="Create Instance">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-kafka-2.png" alt="Create Instance">
+</div>
+</div>
+<div class="paragraph">
+<p>Now, we can create a topic named <code>todo-count</code> :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kafka-topic.png" alt="Create Instance">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kafka-topic-2.png" alt="Create Instance">
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="deploy-quarkus-sb"><a class="anchor" href="#deploy-quarkus-sb"></a>Deploy app in Quarkus using Kafka and Service Binding</h2>
+<h2 id="deploy-quarkus-sb"><a class="anchor" href="#deploy-quarkus-sb"></a>Update the Todo app with Kafka and Service Binding</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>We need to add 2 new extensions :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-config hljs" data-lang="config">./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-smallrye-reactive-messaging-kafka, io.quarkus:quarkus-kubernetes-service-binding"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Update the <code>TodoResource</code> like this :</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package org.acme;
 
+import java.util.List;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
+import io.quarkus.panache.common.Sort;
+
+@Path("/api")
+public class TodoResource {
+
+    @OPTIONS
+    public Response opt() {
+        return Response.ok().build();
+    }
+
+    @Channel("todo-count")
+    Emitter&lt;String&gt; todoEmitter;
+
+    @GET
+    public List&lt;Todo&gt; getAll() {
+        todoEmitter.send(String.valueOf(Todo.count()));
+        return Todo.listAll(Sort.by("order"));
+    }
+
+    @GET
+    @Path("/{id}")
+    public Todo getOne(@PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        return entity;
+    }
+
+    @POST
+    @Transactional
+    public Response create(@Valid Todo item) {
+        item.persist();
+        return Response.status(Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    @Transactional
+    public Response update(@Valid Todo todo, @PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        entity.id = id;
+        entity.completed = todo.completed;
+        entity.order = todo.order;
+        entity.title = todo.title;
+        entity.url = todo.url;
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    @Transactional
+    public Response deleteCompleted() {
+        Todo.deleteCompleted();
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Transactional
+    @Path("/{id}")
+    public Response deleteOne(@PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
+        if (entity == null) {
+            throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
+        }
+        entity.delete();
+        return Response.noContent().build();
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Rebuild your app, create an image, push it and redeploy it Kubernetes.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="knative-eventing"><a class="anchor" href="#knative-eventing"></a>Knative Eventing</h2>
+<h2 id="_enable_managed_service_on_your_sandbox"><a class="anchor" href="#_enable_managed_service_on_your_sandbox"></a>Enable Managed Service on your Sandbox</h2>
 <div class="sectionbody">
-
+<div class="imageblock">
+<div class="content">
+<img src="_images/sandbox-managed.png" alt="Create Instance">
+</div>
+</div>
+<div class="paragraph">
+<p>Now, go back to your hybrid console, select your topic and go to <code>access</code> :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/topic-access.png" alt="Create Instance">
+</div>
+</div>
+<div class="paragraph">
+<p>And assign those permissions :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/assign-permissions.png" alt="Create Instance">
+</div>
+</div>
+<div class="paragraph">
+<p>Connect your Todo app to the Managed Service Kakfa Component by dragging a line from the todo app to the <code>aks</code> component :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/aks.png" alt="Create Instance">
+</div>
+</div>
+<div class="paragraph">
+<p>Now deploy this container image : <code>quay.io/rhdevelopers/todo-count-stream:1.0.0-SNAPSHOT</code></p>
+</div>
+<div class="paragraph">
+<p>Access the route of this new app and add <code>/todo-count</code> to the URL , it will open a page getting stream events.
+To generate an event, just make sure to call the Todo api : <code>/api</code> or refresh the todo.html page.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">
