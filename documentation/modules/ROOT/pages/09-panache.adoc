@@ -37,12 +37,14 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 public class Todo extends PanacheEntity { // <2>
 
     @NotBlank // <3>
-    @Column(unique = true)
+    @JsonSetter("activity")
     public String title;
     public boolean completed;
 
     @Column(name = "ordering")
     public int order;
+
+    @JsonSetter("link")
     public String url;
 
     public static List<Todo> findNotCompleted() { // <4>
@@ -80,10 +82,14 @@ Then let's adapt the `TodoResource.java`:
 ----
 package org.acme;
 
-import java.util.List;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.List;
+
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -99,6 +105,19 @@ import io.quarkus.panache.common.Sort;
 
 @Path("/api")
 public class TodoResource {
+
+@RestClient
+    ActivityService service;
+
+      @GET
+    @Path("load")
+    @Transactional
+    public Response load() {
+        for (long i = 0; i < 10; i++) {
+            service.getActivity().persist();
+        }
+        return Response.status(Status.CREATED).build();
+    }
 
     @OPTIONS
     public Response opt() {
@@ -170,18 +189,23 @@ Open `src/main/resources/application.properties`, and add the following Hibernat
 [.console-input]
 [source, properties]
 ----
-%dev.quarkus.hibernate-orm.database.generation=update
-quarkus.hibernate-orm.database.generation=drop-and-create
+quarkus.hibernate-orm.database.generation=update
 ----
 
-Both properties are the same key, but the values are used depending on starting mode.At dev mode (`%dev`) the value used for the property is `update` while the other is used in the other cases.
-
-Also add a property to show SQL statements executed by the application.
+Also add a property to show SQL statements executed by the application but only when using dev-mode.
 
 [.console-input]
 [source, properties]
 ----
 %dev.quarkus.hibernate-orm.log.sql=true
+----
+
+Now, invoke the `/api/load` endpoint to enter some data in the database:
+
+[.console-input]
+[source, bash]
+----
+curl localhost:8080/api/load
 ----
 
 [#dev-services]
@@ -259,37 +283,17 @@ Now open again the `src/main/resources/application.properties` configuration fil
 [source, properties]
 .src/main/resources/application.properties
 ----
+quarkus.kubernetes.env.secrets=postgresql
+
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=admin
-quarkus.datasource.password=admin
-quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo
+quarkus.datasource.username=${database-user:admin}
+quarkus.datasource.password=${database-password:admin}
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/${database-name}
 ----
 
-Also, let's automate the creation of an OpenShift Route.
-Copy the following content at the bottom of `src/main/kubernetes/kubernetes.yml` file:
+NOTE: Please note that the values for user, password and database name are filled in from a Kubernetes Secret. 
+This secret is generated when you instantiate your PostgreSQL database via the Red Hat OpenShift template.
 
-[.console-input]
-[source, yaml]
-.src/main/kubernetes/kubernetes.yml
-----
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    app.quarkus.io/commit-id: 72db1f18a9d063476e333b963655b4192a45e030
-    app.quarkus.io/build-timestamp: 2022-04-05 - 21:26:33 +0000
-  labels:
-    app.kubernetes.io/version: 1.0.0-SNAPSHOT
-    app.kubernetes.io/name: quarkus-app-workshop
-  name: quarkus-app-workshop
-spec:
-  port:
-    targetPort: 8080
-  to:
-    kind: Service
-    name: quarkus-app-workshop
-----
 
 The last step is deploying the application to sandbox by running:
 

@@ -53,7 +53,7 @@ Let's expose the service deployed in <<Kubernetes Deployment>> section by using 
 [.console-input]
 [source,bash]
 ----
-oc expose svc todo-app-jvm
+oc expose svc quarkus-app-workshop
 ----
 
 Let's run a hey command against the route exposed by previous deployment:
@@ -61,7 +61,7 @@ Let's run a hey command against the route exposed by previous deployment:
 [.console-input]
 [source,bash]
 ----
-export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')
+export ROUTE_URL=http://$(kubectl get route quarkus-app-workshop -o jsonpath='{.spec.host}')
 hey -n 1000 -c 200 $ROUTE_URL/api
 ----
 

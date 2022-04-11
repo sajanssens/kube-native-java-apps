@@ -1,9 +1,13 @@
 package org.acme;
 
-import java.util.List;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.List;
+
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -20,8 +24,22 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import io.quarkus.panache.common.Sort;
 
+
 @Path("/api")
 public class TodoResource {
+
+    @RestClient
+    ActivityService service;
+    
+    @GET
+    @Path("load")
+    @Transactional
+    public Response load() {
+        for (long i = 0; i < 10; i++) {
+            service.getActivity().persist();
+        }
+        return Response.status(Status.CREATED).build();
+    }
 
     @OPTIONS
     public Response opt() {
@@ -50,7 +68,7 @@ public class TodoResource {
     @POST
     @Transactional
     public Response create(@Valid Todo item) {
-        item.persist();
+        item.persist(); 
         return Response.status(Status.CREATED).entity(item).build();
     }
 
@@ -64,7 +82,7 @@ public class TodoResource {
         entity.order = todo.order;
         entity.title = todo.title;
         entity.url = todo.url;
-        return Response.ok(entity).build();
+        return Response.ok(entity).build(); 
     }
 
     @DELETE
@@ -85,5 +103,4 @@ public class TodoResource {
         entity.delete();
         return Response.noContent().build();
     }
-
 }

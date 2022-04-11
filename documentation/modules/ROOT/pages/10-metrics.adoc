@@ -12,7 +12,7 @@ The OpenTelemetry Collector acts as an proxy for Jaeger and Prometheus.
 
 IMPORTANT: This setup has development purposes and is due to resource constraints that exist within Red Hat OpenShift Developer Sandbox.
 
-First, open in broswer terminal and type the command:
+First, open the broswer terminal and type the command:
 [.console-input]
 [source,bash]
 ----
@@ -55,7 +55,7 @@ mvn quarkus:add-extension -Dextensions="io.quarkus:quarkus-micrometer-registry-p
 
 === Configuration of common tags
 
-When deploying accross multiple projects/namespaces is always good to have an unified view over some application metrics.
+When deploying across multiple projects/namespaces is always good to have an unified view over some application metrics.
 Let's define several common tags for the application, varying in value at deployment time:
 
 [.console-input]
@@ -173,7 +173,7 @@ Find the route associated to your application (the one you used in <<Kubernetes 
 [.console-input]
 [source,bash]
 ----
-export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')
+export ROUTE_URL=http://$(kubectl get route quarkus-app-workshop -o jsonpath='{.spec.host}')
 ----
 
 Let's make a few curl requests:
@@ -255,17 +255,14 @@ We should capture the situations when trying to delete a ToDo item that does not
 ----
 package org.acme;
 
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.util.List;
+
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -277,19 +274,24 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.quarkus.panache.common.Sort;
+
+
 @Path("/api")
 public class TodoResource {
-
-    private final Map<Long, Todo> todos = new HashMap<>();
 
     @RestClient
     ActivityService service;
 
-    @PostConstruct
-    public void init() {
-       for (long i = 0; i < 10; i++) {
-           todos.put(i, service.getActivity() );
-       }
+
+    @GET
+    @Path("load")
+    @Transactional
+    public Response load() {
+        for (long i = 0; i < 10; i++) {
+            service.getActivity().persist();
+        }
+        return Response.status(Status.CREATED).build();
     }
 
     @OPTIONS
@@ -299,13 +301,13 @@ public class TodoResource {
 
     @GET
     public List<Todo> getAll() {
-        return new ArrayList<>(todos.values());
+        return Todo.listAll(Sort.by("order")); 
     }
 
     @GET
     @Path("/{id}")
     public Todo getOne(@PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+        Todo entity = Todo.findById(id);
         if (entity == null) {
             throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
         }
@@ -313,39 +315,43 @@ public class TodoResource {
     }
 
     @POST
-    public Response create(Todo item) {
-        todos.put(item.id, item);
+    @Transactional
+    public Response create(@Valid Todo item) {
+        item.persist(); 
         return Response.status(Status.CREATED).entity(item).build();
     }
 
     @PATCH
     @Path("/{id}")
-    public Response update(Todo todo, @PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+    @Transactional
+    public Response update(@Valid Todo todo, @PathParam("id") Long id) {
+        Todo entity = Todo.findById(id);
         entity.id = id;
         entity.completed = todo.completed;
         entity.order = todo.order;
         entity.title = todo.title;
         entity.url = todo.url;
-        return Response.ok(entity).build();
+        return Response.ok(entity).build(); 
     }
 
     @DELETE
+    @Transactional
     public Response deleteCompleted() {
-        todos.entrySet().removeIf(e -> e.getValue().completed);
+        Todo.deleteCompleted();
         return Response.noContent().build();
     }
 
     @DELETE
+    @Transactional
     @Path("/{id}")
     public Response deleteOne(@PathParam("id") Long id) {
-        Todo entity = todos.get(id);
+        Todo entity = Todo.findById(id);
         if (entity == null) {
             Span.current().setAttribute("alarm", "unexpected")//<1>
                     .setStatus(StatusCode.ERROR, "Something wrong happened!");//<2>
             throw new WebApplicationException("Todo with id of " + id + " does not exist.", Status.NOT_FOUND);
         }
-        todos.remove(id);
+        entity.delete();
         return Response.noContent().build();
     }
 }
@@ -366,7 +372,7 @@ Find the route associated to your application (the one you used in <<Kubernetes 
 [.console-input]
 [source,bash]
 ----
-export ROUTE_URL=http://$(kubectl get route todo-app-jvm -o jsonpath='{.spec.host}')
+export ROUTE_URL=http://$(kubectl get route quarkus-app-workshop -o jsonpath='{.spec.host}')
 ----
 
 Let's make a few curl requests:

@@ -35,7 +35,7 @@ spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: todo-app-jvm
+      app.kubernetes.io/name: quarkus-app-workshop
 ----
 
 Typically you will install `src/main/kubernetes/pdb.yml` in an Kubernetes/OpenShift environment and will observe that the configuration is rejected.
