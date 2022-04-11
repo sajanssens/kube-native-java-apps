@@ -19,6 +19,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
 import io.quarkus.panache.common.Sort;
 
 
@@ -43,9 +46,13 @@ public class TodoResource {
         return Response.ok().build();
     }
 
+    @Channel("todo-count")
+    Emitter<String> todoEmitter;
+
     @GET
     public List<Todo> getAll() {
-        return Todo.listAll(Sort.by("order")); 
+        todoEmitter.send(String.valueOf(Todo.count()));
+        return Todo.listAll(Sort.by("order"));
     }
 
     @GET
