@@ -441,15 +441,11 @@ Open <code>src/main/resources/application.properties</code>, and add the followi
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">%dev.quarkus.hibernate-orm.database.generation=update
-quarkus.hibernate-orm.database.generation=drop-and-create</code></pre>
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.hibernate-orm.database.generation=update</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Both properties are the same key, but the values are used depending on starting mode.At dev mode (<code>%dev</code>) the value used for the property is <code>update</code> while the other is used in the other cases.</p>
-</div>
-<div class="paragraph">
-<p>Also add a property to show SQL statements executed by the application.</p>
+<p>Also add a property to show SQL statements executed by the application but only when using dev-mode.</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -561,7 +557,7 @@ Inspect the logs to see the SQL statements.</p>
 <pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=admin
 quarkus.datasource.password=admin
-quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo</code></pre>
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://postgresql:5432/todo</code></pre>
 </div>
 </div>
 <div class="paragraph">
