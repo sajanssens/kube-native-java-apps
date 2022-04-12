@@ -24,7 +24,7 @@ In the terminal window please execute the following command
 As mentioned in the goals of this section, at application startup we would like to have some already defined activities.
 We can do that by consuming ideas of activities from an external service.
 
-Will start by modifying the `Todo.java` class to help when reading the data from the external service:
+We will start by modifying the `Todo.java` class to help when reading the data from the external service:
 
 [.console-input]
 [source,java]
@@ -50,7 +50,7 @@ public class Todo {
 }
 ----
 <1> The properties that are defined in the external service but not mapped within the class will be ignored.
-<2> Assign to `title` field the value had by the `activity` JSON property.
+<2> Assign to the `title` field the value held by the `activity` JSON property.
 
 And now let's define an interface and register it as a REST client:
 
@@ -81,7 +81,7 @@ public interface ActivityService {
 ----
 
 `@RegisterRestClient` allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client.
-To have more flexibility in our configuration, will the rest of the URL in in `src/main/resources/application.properties`:
+To have more flexibility in our configuration, will the rest of the URL in `src/main/resources/application.properties`:
 
 [.console-input]
 [source,config,subs="+macros,+attributes"]

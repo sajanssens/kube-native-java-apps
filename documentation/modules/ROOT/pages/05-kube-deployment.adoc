@@ -235,7 +235,7 @@ spec:
   type: ClusterIP
 ----
 
-Finally, regenerate the resources executing the following command:
+Finally, regenerate the resources by executing the following command:
 
 [.console-input]
 [source, bash]

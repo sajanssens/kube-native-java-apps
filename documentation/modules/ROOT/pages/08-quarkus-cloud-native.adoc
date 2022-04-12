@@ -3,7 +3,7 @@ include::_attributes.adoc[]
 
 IMPORTANT: You need to finish the <<Kubernetes Deployment>> section before advancing into adjusting resources.
 
-By default, containers run with unbounded compute resources on a Kubernetes cluster. Developer Sandbox is a managed OpenShift environment, its cluster resources are tailored per development needs.
+By default, containers run with unbounded compute resources on a Kubernetes cluster. Developer Sandbox is a managed OpenShift environment, and its cluster resources are tailored per development needs.
 
 [#limits]
 == Discovering project resource limits
