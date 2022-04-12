@@ -4,7 +4,7 @@ include::_attributes.adoc[]
 [#kube-extension]
 == Kubernetes Extension
 
-IMPORTANT: You need to finish the <<Creating containers>> section before going into Kubernetes section.
+IMPORTANT: You need to finish the https://redhat-scholars.github.io/kube-native-java-apps/kube-native-java-apps/04-containers.html[Creating containers, window="_blank"] section before going into Kubernetes section.
 
 === Deploying to Kubernetes with YAMLs
 
@@ -77,8 +77,8 @@ With the extension added, run the following command to generate the Kubernetes r
 ./mvnw clean package -DskipTests
 ----
 
-After running this command at the `target/kubernetes` directory, Quarkus places a `kubernetes.yaml` and `kubernets.json` files to deploy the application.
-One of the great things about the extension is the integration with container extension seen at <<Creating containers>> section, so `image` tag is pointing out to the image created there.
+After running this command at the `target/kubernetes` directory, Quarkus places `kubernetes.yaml` and `kubernetes.json` files to deploy the application.
+One of the great things about the extension is the integration with container extension seen at https://redhat-scholars.github.io/kube-native-java-apps/kube-native-java-apps/04-containers.html[Creating containers, window="_blank"] section, so `image` tag is pointing out to the image created there.
 
 To deploy the application, we have two options, the first one, applying the resource manually:
 
