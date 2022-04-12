@@ -408,6 +408,8 @@ curl myapp-asotobue-dev.apps.sandbox.x8i5.p1.openshiftapps.com
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl scale deployment myapp --replicas=3
+
+kubectl get deployments
 ----
 
 [.console-output]
