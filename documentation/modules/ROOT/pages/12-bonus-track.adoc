@@ -5,7 +5,7 @@ include::_attributes.adoc[]
 == Create a Managed Kafka instance
 
 With your Red Hat Developer account you also have access to http://console.redhat.com/[Red Hat Hybrid Console].
-From there you can access the https://console.redhat.com/application-services/overview[Application Services] and you can create your kafka instance : 
+From there, you can access the https://console.redhat.com/application-services/overview[Application Services] and you can create your kafka instance: 
 
 image::create-kafka.png[Managed Kakfa]
 
@@ -13,7 +13,7 @@ image::create-kafka-1.png[Create Instance]
 
 image::create-kafka-2.png[Create Instance]
 
-Now, we can create a topic named `todo-count` : 
+Now, we can create a topic named `todo-count`: 
 
 image::kafka-topic.png[Create Instance]
 
@@ -26,7 +26,7 @@ image::kafka-topic-2.png[Create Instance]
 [#deploy-quarkus-sb]
 == Update the Todo app with Kafka and Service Binding
 
-We need to add 2 new extensions : 
+We need to add 2 new extensions: 
 
 [.console-input]
 [source,config,subs="+macros,+attributes"]
@@ -34,7 +34,7 @@ We need to add 2 new extensions :
 ./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-smallrye-reactive-messaging-kafka, io.quarkus:quarkus-kubernetes-service-binding"
 ----
 
-Update the `TodoResource` like this : 
+Update the `TodoResource` like this: 
 
 [.console-input]
 [source, java]
@@ -130,27 +130,27 @@ public class TodoResource {
 }
 ----
 
-Rebuild your app, create an image, push it and redeploy it Kubernetes.
+Rebuild your app, create an image, push it and redeploy it to Kubernetes.
 
 == Enable Managed Service on your Sandbox
 
 image::sandbox-managed.png[Create Instance]
 
-Now, go back to your hybrid console, select your topic and go to `access` : 
+Now, go back to your hybrid console, select your topic and go to `access`: 
 
 image::topic-access.png[Create Instance]
 
-And assign those permissions : 
+And assign those permissions: 
 
 image::assign-permissions.png[Create Instance]
 
-Connect your Todo app to the Managed Service Kakfa Component by dragging a line from the todo app to the `aks` component : 
+Connect your Todo app to the Managed Service Kakfa Component by dragging a line from the todo app to the `aks` component: 
 
 image::aks.png[Create Instance]
 
-Now deploy this container image : `quay.io/rhdevelopers/todo-count-stream:1.0.0-SNAPSHOT`
+Now deploy this container image: `quay.io/rhdevelopers/todo-count-stream:1.0.0-SNAPSHOT`
 
-Access the route of this new app and add `/todo-count` to the URL , it will open a page getting stream events. 
+Access the route of this new app and add `/todo-count` to the URL, it will open a page getting stream events. 
 To generate an event, just make sure to call the Todo api : `/api` or refresh the todo.html page.
 
 

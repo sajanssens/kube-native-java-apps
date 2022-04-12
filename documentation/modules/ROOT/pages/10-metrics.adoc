@@ -8,7 +8,7 @@ Tracing helps you with following the evolution of a transaction and it usually n
 == Setup
 
 As we will need to correlate our metrics and traces, we should make a small setup for Jaeger, OpenTelemetry Collector and Prometheus.
-The OpenTelemetry Collector acts as an proxy for Jaeger and Prometheus.
+The OpenTelemetry Collector acts as a proxy for Jaeger and Prometheus.
 
 IMPORTANT: This setup has development purposes and is due to resource constraints that exist within Red Hat OpenShift Developer Sandbox.
 
@@ -55,7 +55,7 @@ mvn quarkus:add-extension -Dextensions="io.quarkus:quarkus-micrometer-registry-p
 
 === Configuration of common tags
 
-When deploying across multiple projects/namespaces is always good to have an unified view over some application metrics.
+When deploying across multiple projects/namespaces is always good to have a unified view over some application metrics.
 Let's define several common tags for the application, varying in value at deployment time:
 
 [.console-input]
@@ -85,7 +85,7 @@ global.region=${REGION:CEE} <1>
 global.country=${COUNTRY:'Romania'}
 ----
 
-<1> Environment configuration will be named `REGION` and having the default value `CEE`.
+<1> Environment configuration will be named `REGION` and has the default value `CEE`.
 
 Further, we will propagate these configurations by via `MeterFilter` customization:
 
@@ -137,7 +137,7 @@ quarkus.micrometer.export.prometheus.path=/metrics#<5>
 quarkus.micrometer.binder.jvm=true#<6>
 ----
 <1> Outbound HTTP request metrics support.
-<2> Inboud HTTP request metrics support.
+<2> Inbound HTTP request metrics support.
 <3> Micrometer System metrics support.
 <4> Enable export of metrics to Prometheus.
 <5> Customize the path where metrics are exposed.

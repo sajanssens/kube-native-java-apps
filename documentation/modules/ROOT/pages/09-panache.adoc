@@ -183,7 +183,7 @@ public class TodoResource {
 <2> Method for persisting data
 <3> Update is applied automatically within a transaction
 
-Last thing is to configure Datasource and Hibernate.
+The last thing is to configure Datasource and Hibernate.
 Open `src/main/resources/application.properties`, and add the following Hibernate configuration property to create database schema automatically.
 
 [.console-input]
@@ -257,7 +257,7 @@ Stop the application (`Ctrl+C`), and let's see how to deploy the application wit
 
 === Deploy PostgreSQL in the sandbox
 
-Open Red Hat Sandbox console in Developers view (if not already there) and create a PostgreSQL instance by running the following steps.
+Open the Red Hat Sandbox console in Developers view (if not already there) and create a PostgreSQL instance by running the following steps.
 
 Click to *+Add* button, scroll to Developers Catalog section, and click on *Database* section.
 
@@ -318,7 +318,7 @@ There scale down the Pod to 0 instances by clicking the arrow as shown in the fo
 
 image::devsandbox-psql-scale-down.png[]
 
-Then wait some seconds and you'll see that the aplication becomes not ready as the readiness check fails.
+Then wait some seconds and you'll see that the application becomes not ready as the readiness check fails.
 
 image::devsandbox-app-not-ready.png[]
 

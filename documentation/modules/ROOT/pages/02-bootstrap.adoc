@@ -331,7 +331,7 @@ This is a really simple example, let's move things forward and create a TODO app
 [#resteasy-openapi]
 == RestEasy Jackson/OpenAPI
 
-The first thing before starting developing the TODO app is registering two new extensions, one for adding the Jackson support so marshelling/unmarshelling operations from/to Java objects from/to JSON documents, happens automatically.
+The first thing before starting developing the TODO app is registering two new extensions, one for adding the Jackson support so marshalling/unmarshalling operations from/to Java objects from/to JSON documents, happens automatically.
 
 Moreover, we're going to add the OpenAPI extension so a Swagger UI interface is deployed automatically to test the API.
 
@@ -510,11 +510,11 @@ curl localhost:8080/api
 At this point, we've seen how to test the application backend using Swagger UI.
 
 But there is no frontend yet for the application.
-Quarkus let's you copy HTML resources to `src/main/resources/META-INF/resources` directory and serving them as static resources.
+Quarkus lets you copy HTML resources to `src/main/resources/META-INF/resources` directory and serving them as static resources.
 
-We've developed a UI for the TODO application, download the zip file containing the https://github.com/redhat-scholars/kube-native-java-apps/releases/download/TODO-UI/resources.zip[UI] from GitHub.
+We've developed a UI for the TODO application, download the zip file containing the https://github.com/redhat-scholars/kube-native-java-apps/releases/download/TODO-UI/resources.zip[UI from GitHub].
 
-In a terminal window, go to `src/main/resources/META-INF` directory, copy the `resourcse.zip` file there, and unzip it.
+In a terminal window, go to `src/main/resources/META-INF` directory, copy the `resources.zip` file there, and unzip it.
 
 [.console-input]
 [source, bash]
