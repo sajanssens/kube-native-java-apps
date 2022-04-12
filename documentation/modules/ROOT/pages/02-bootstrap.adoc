@@ -9,7 +9,7 @@ There are several ways to create a Quarkus project and all of them are valid:
 * Maven
 * https://code.quarkus.io/[Code Quarkus website]
 
-For the sake of simplicity, we are going to use the later one.
+For the sake of simplicity, we are going to use the latter one.
 Open a browser and navigate to https://code.quarkus.io/.
 
 There you can set the name of the artifact (`todo-app`) and select the RESTEasy JAX-RS endpoint to create a REST API service.
@@ -170,7 +170,7 @@ public class GreetingResourceTest {
 }
 ----
 <1> Although not mandatory, Quarkus uses https://rest-assured.io/[RestAssured] to test Rest APIs
-<2> This annotations boots up the application before executing the tests
+<2> This annotation boots up the application before executing the tests
 <3> The location of the service (`host:port`) is automatically configured
 <4> Creates a `GET` HTTP request to `/hello`
 <5> Asserts that the message is `Hello RESTEasy`
